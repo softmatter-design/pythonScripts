@@ -1,0 +1,82 @@
+\begin{def}
+    Basics:{
+        Cognac_ver:select{
+            "cognac101", 
+            "cognac112"
+            }, // Cognac version
+        Cores: int // 計算に使用するコア数を指定
+        }
+
+    SimulationCond:{
+        TargetModel:select{ 
+            "3_Chain_S", 
+            "3_Chain_D", 
+            "4_Chain", 
+            "6_Chain", 
+            "8_Chain"
+            },
+        Type:{
+            NWType:select{
+                "KG_entangled",   // 密度、末端間距離を設定値に合わせるように多重度を変化。 絡み合いが入るように初期化
+                "KG_NPT",		    // 密度、末端間距離を設定値に合わせるように多重度を変化。 絡み合いが入らないようにNPTで縮める
+                "KG_single",    	// 設定した多重度で、密度を設定値になるように、システムサイズを縮める
+                "KG_gel",	    	// 設定した多重度で、密度、末端間距離を設定値に合わせるように、溶剤を添加
+                "Sunuke",	    	// 設定した多重度で末端間距離を設定値に合わせるように、密度を無視してスヌケ鎖を設定
+                "Sunuke_dens"       // 設定した多重度、設定した密度となるようにシステムサイズを縮めてスヌケ鎖を設定
+                },
+                KG_entangled:{
+                    N_Segments: int,
+                    N_UnitCells: int,
+                },
+                KG_NPT:{
+                    N_Segments: int,
+                    N_UnitCells: int,
+                    ExpansionRatio: float
+                    StepPress[]: float
+                },
+                KG_single:{
+                    N_Segments: int,
+                    N_UnitCells: int,
+                    Multiplicities: int,
+                    ExpansionRatio: float
+                },
+                KG_gel:{
+                    N_Segments: int,
+                    N_UnitCells: int,
+                    Multiplicities: int,
+                    ExpansionRatio: float
+                },
+                Sunuke:{
+                    N_Segments: int,
+                    N_UnitCells: int,
+                    Multiplicities: int,
+                    ExpansionRatio: float
+                },
+                Sunuke_dens:{
+                    N_Segments: int,
+                    N_UnitCells: int,
+                    Multiplicities: int,
+                    ExpansionRatio: float
+                }
+            }
+        }
+\end{def}
+
+\begin{data}
+    Basics:{
+        "cognac112",
+        1
+        }
+
+    SimulationCond:{
+        "4_Chain",
+        {"KG_NPT",
+            {20, 3},
+            {20, 3, 2.0, [0.1, 0.2, 0.5, 1.0, 2.0, 3.0]},
+            {20, 3, 1, 2.0},
+            {20, 3, 1, 2.0},
+            {20, 3, 3, 3},
+            {20, 3, 3, 3},
+        }
+    }
+\end{data}

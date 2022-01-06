@@ -61,8 +61,12 @@ class SetUpUDF:
 			batch = self.sunuke_calc(batch)
 			# 評価用のパイソンスクリプトを作成
 			self.evaluate_setup("strand")
-		elif self.calc_type == "KG_NPT" or self.calc_type == "KG_single" or self.calc_type == "KG_gel":
+		elif self.calc_type == "KG_NPT" or self.calc_type == "KG_single":
 			batch = self.npt_calc(batch)
+			# 評価用のパイソンスクリプトを作成
+			self.evaluate_setup("strand")
+		elif self.calc_type == "KG_gel":
+			batch = self.npt_gel(batch)
 			# 評価用のパイソンスクリプトを作成
 			self.evaluate_setup("strand")
 
@@ -338,44 +342,120 @@ class SetUpUDF:
 	# NPT 条件で、設定密度まで圧縮
 	def npt_calc(self, batch):
 		# NPTの設定
-		pres = 0.01
-		batch = self.make_title(batch, "Calculating-Ini_NPT")
+		pres = 0.1
+		batch = self.make_title(batch, "Calculating-Ini_NPT_" + str(pres).replace('.', '_'))
 		fn_ext = ['Init_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
-		time = [0.001, 1000, 100]
+		time = [0.001, 20000, 200]
 		f_eval = 0
 		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
 		self.npt_setup(self.base_udf, '', present_udf, time, pres)
 		pre = read_udf
 		template = present_udf
 		# ステップワイズに圧力増加
-		for pres in [0.02, 0.05, 0.1, 0.5, 0.75]:
-			batch = self.make_title(batch, "Calculating-Step_NPT")
+		for pres in [0.2, 0.5, 1.0, 2.0, 3.0, 4.5]:
+			batch = self.make_title(batch, "Calculating-Ini_NPT_" + str(pres).replace('.', '_'))
 			fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
-			time = [0.01, 500000, 20000]
+			time = [0.01, 100000, 1000]
 			f_eval = 1
 			present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
 			self.npt_setup(template, pre, present_udf, time, pres)
 			pre = read_udf
 			template = present_udf
 		# ステップワイズに圧力増加
-		for pres in [1.0, 1.3, 1.6, 2.0]:
-			batch = self.make_title(batch, "Calculating-Step_NPT")
+		# for pres in [1.0, 1.3, 1.6, 2.0]:
+		# 	batch = self.make_title(batch, "Calculating-Step_NPT")
+		# 	fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
+		# 	time = [0.01, 2000000, 50000]
+		# 	f_eval = 1
+		# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+		# 	self.npt_setup(template, pre, present_udf, time, pres)
+		# 	pre = read_udf
+		# 	template = present_udf
+		# for pres in [2.5, 3.0, 4.5]:
+		# 	batch = self.make_title(batch, "Calculating-Step_NPT")
+		# 	fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
+		# 	time = [0.01, 500000, 20000]
+		# 	f_eval = 1
+		# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+		# 	self.npt_setup(template, pre, present_udf, time, pres)
+		# 	pre = read_udf
+		# 	template = present_udf
+		# KG 鎖に設定
+		time = [0.01, 100000, 1000]
+		batch = self.make_title(batch, "Calculating-KG")
+		fn_ext = ['Setup_', "_uin.udf"]
+		f_eval = 1
+		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+		self.kg_setup(template, pre, present_udf, time)
+		pre = read_udf
+		template = present_udf
+		# 平衡化計算
+		time = [0.01, 200000, 1000]
+		for i in range(5):
+			# 平衡化
+			batch = self.make_title(batch, "Calculating-Eq_" + str(i))
+			fn_ext = ['Eq_' + str(i) + "_", "_uin.udf"]
+			f_eval = 1
+			present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+			self.eq_setup(template, pre, present_udf, time)
+			pre = read_udf
+			template = present_udf
+		# # グリーン久保
+		# repeat = 3
+		# time = [0.01, 2000000, 100000]
+		# for i in range(repeat):
+		# 	# 平衡化
+		# 	batch = self.make_title(batch, "Calculating-GK_" + str(i))
+		# 	fn_ext = ['GK_' + str(i) + "_", "_uin.udf"]
+		#	f_eval = 1
+		# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+		# 	self.greenkubo_setup(template, pre, present_udf, time)
+		# 	pre = read_udf
+		# 	template = present_udf
+		return batch
+
+	###########################################
+	# NPT 条件で、設定密度まで圧縮（ゲルの場合は圧縮をきつく）
+	def npt_gel(self, batch):
+		# NPTの設定
+		pres = 0.1
+		batch = self.make_title(batch, "Calculating-Ini_NPT_" + str(pres).replace('.', '_'))
+		fn_ext = ['Init_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
+		time = [0.001, 20000, 200]
+		f_eval = 0
+		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+		self.npt_setup(self.base_udf, '', present_udf, time, pres)
+		pre = read_udf
+		template = present_udf
+		# ステップワイズに圧力増加
+		for pres in [0.2, 0.5, 1.0, 2.0, 5.0, 6.5]:
+			batch = self.make_title(batch, "Calculating-Ini_NPT_" + str(pres).replace('.', '_'))
 			fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
-			time = [0.01, 2000000, 50000]
+			time = [0.01, 100000, 1000]
 			f_eval = 1
 			present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
 			self.npt_setup(template, pre, present_udf, time, pres)
 			pre = read_udf
 			template = present_udf
-		for pres in [2.5, 3.0, 4.5]:
-			batch = self.make_title(batch, "Calculating-Step_NPT")
-			fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
-			time = [0.01, 500000, 20000]
-			f_eval = 1
-			present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-			self.npt_setup(template, pre, present_udf, time, pres)
-			pre = read_udf
-			template = present_udf
+		# ステップワイズに圧力増加
+		# for pres in [1.0, 2.0, 5.0]:
+		# 	batch = self.make_title(batch, "Calculating-Step_NPT")
+		# 	fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
+		# 	time = [0.01, 100000, 1000]
+		# 	f_eval = 1
+		# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+		# 	self.npt_setup(template, pre, present_udf, time, pres)
+		# 	pre = read_udf
+		# 	template = present_udf
+		# for pres in [6.0, 7.0]:
+		# 	batch = self.make_title(batch, "Calculating-Step_NPT")
+		# 	fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
+		# 	time = [0.01, 100000, 1000]
+		# 	f_eval = 1
+		# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+		# 	self.npt_setup(template, pre, present_udf, time, pres)
+		# 	pre = read_udf
+		# 	template = present_udf
 		# KG 鎖に設定
 		time = [0.01, 100000, 1000]
 		batch = self.make_title(batch, "Calculating-KG")

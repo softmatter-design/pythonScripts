@@ -208,11 +208,11 @@ class EvaluateChain:
 		mm.make_all()
 		mm = MakeMulti(["Corr_stress_all", corr_all, ['Time', 'sigma', 'ave']], self.target_name)
 		mm.make_all()
-		mm = MakeMulti(["Corr_stress_semi", corr, ['Time', 'sigma']], self.target_name)
-		mm.make_all()
+		# mm = MakeMulti(["Corr_stress_semi", corr, ['Time', 'sigma']], self.target_name)
+		# mm.make_all()
 		self.irheo(corr)
-		mm = MakeMulti(["Corr_stress_mod", corr_mod, ['Time', 'sigma']], self.target_name)
-		mm.make_all()
+		# mm = MakeMulti(["Corr_stress_mod", corr_mod, ['Time', 'sigma']], self.target_name)
+		# mm.make_all()
 		return
 
 	def calc_corr(self):
@@ -242,15 +242,17 @@ class EvaluateChain:
 		minmax = [1e-5, 1e2]
 		div = 10
 		#
-		mod = self.modify(data_list)
-		gt, mod_gt = self.modify_data(mod)
-		# save_data(mod_gt, 'modified.dat')
-		# plotgtgw('modified.dat')
-		gw = self.calcgw(mod_gt, minmax, div)
+		# mod = self.modify(data_list)
+		# gt, mod_gt = self.modify_data(mod)
+		#
+		gw = self.calcgw(data_list, minmax, div)
 		self.save_data(gw, 'gw.dat')
 		#
+		# self.save_data(data_list, 'modified.dat')
+		# self.plotgtgw('modified.dat')
 		# cmd = "corr2gw < modified.dat > gw.dat"
 		# subprocess.call(cmd, shell=True)
+
 		self.plotgtgw('gw.dat')
 		#
 		return
@@ -722,7 +724,7 @@ class MakeMulti:
 				for i, data in enumerate(self.list):
 					f.write("\n\n# " + str(i) +":\n\n")
 					for line in data:
-						print(line)
+						# print(line)
 						f.write(str(line[0]) + '\t' + str(line[1])  + '\n')
 		return
 
