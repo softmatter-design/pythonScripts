@@ -19,10 +19,11 @@ class InitialSetup:
 		self.n_cell = sim_cond[3]
 		self.multi_init = sim_cond[4]
 		self.target_density = sim_cond[5]
-		self.n_strand = sim_cond[6]
-		self.l_bond = sim_cond[7]
-		self.c_n = sim_cond[8]
-
+		self.expand = sim_cond[6]
+		self.n_strand = sim_cond[7]
+		self.l_bond = sim_cond[8]
+		self.c_n = sim_cond[9]
+		self.step_press = sim_cond[10]
 	##########################################
 	##### ネットワークポリマーの諸量を計算 ######
 	##########################################
@@ -138,6 +139,7 @@ class InitialSetup:
 			text += "設定密度:\t\t\t" + str(self.target_density) + "\n"
 			text += "セグメント数:\t\t\t" + str(total_net_atom) + "\n"
 			text += "収縮比:\t\t\t\t" + str(round(shrinkage, 4)) + "\n"
+			text += "ステップ圧力:\t\t" + ', '.join(map(str, self.step_press)) + "\n"
 			text += "収縮後の末端間距離：\t\t" + str(round(mod_e2e,5)) + "\n"
 			text += "収縮後のシステムサイズ:\t\t" + str(round(system, 4)) + "\n"
 			text += "ストランドの数密度:\t\t" + str(round(nu, 5)) + "\n"

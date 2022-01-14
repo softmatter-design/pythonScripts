@@ -9,18 +9,17 @@ import os
 # UDF の作成
 ##########################################
 class SetUpUDF:
-	def __init__(self, nw_type, files_cond, target_name, py_mod, target_dir, names):
-		# 
-		self.calc_type = nw_type
+	def __init__(self, basic_cond, sim_cond, target_name, target_dir, names):
 		#
-		self.ver_cognac = files_cond[0]
-		self.blank_udf = files_cond[1]
-		self.base_udf = files_cond[2]
-		self.core = ' -n ' + str(files_cond[3])
+		self.ver_cognac = basic_cond[0]
+		self.blank_udf = basic_cond[1]
+		self.base_udf = basic_cond[2]
+		self.core = ' -n ' + str(basic_cond[3])
+		# 
+		self.calc_type = sim_cond[1]
+		self.step_press = sim_cond[10]
 		#
 		self.target_name = target_name
-		# モデュールの位置
-		self.py_mod = py_mod
 		self.f_eval_py = 'evaluate_all.py'
 		# ファイルのディレクトリ
 		self.target_dir = target_dir
@@ -85,10 +84,8 @@ class SetUpUDF:
 		script = '#!/usr/bin/env python \n# -*- coding: utf-8 -*-\n'
 		script += '################################\n'
 		script += 'import os \nimport sys \n'
-		script += 'py_mod = "' + self.py_mod + '"\n'
-		script += 'sys.path.append(py_mod)\n'
 		# if target == "chain":
-		script += 'from evaluation import EvaluateChain as ec\n'
+		script += 'import EvaluateChain as ec\n'
 		script += '################################\n'
 		# script += 'ec = EvaluateChain.EvaluateAll()\n'
 		script += 'ec.evaluate_all()\n\n'
@@ -352,7 +349,7 @@ class SetUpUDF:
 		pre = read_udf
 		template = present_udf
 		# ステップワイズに圧力増加
-		for pres in [0.2, 0.5, 1.0, 2.0, 3.0, 4.5]:
+		for pres in self.step_press:
 			batch = self.make_title(batch, "Calculating-Ini_NPT_" + str(pres).replace('.', '_'))
 			fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
 			time = [0.01, 100000, 1000]
@@ -361,25 +358,6 @@ class SetUpUDF:
 			self.npt_setup(template, pre, present_udf, time, pres)
 			pre = read_udf
 			template = present_udf
-		# ステップワイズに圧力増加
-		# for pres in [1.0, 1.3, 1.6, 2.0]:
-		# 	batch = self.make_title(batch, "Calculating-Step_NPT")
-		# 	fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
-		# 	time = [0.01, 2000000, 50000]
-		# 	f_eval = 1
-		# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		# 	self.npt_setup(template, pre, present_udf, time, pres)
-		# 	pre = read_udf
-		# 	template = present_udf
-		# for pres in [2.5, 3.0, 4.5]:
-		# 	batch = self.make_title(batch, "Calculating-Step_NPT")
-		# 	fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
-		# 	time = [0.01, 500000, 20000]
-		# 	f_eval = 1
-		# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		# 	self.npt_setup(template, pre, present_udf, time, pres)
-		# 	pre = read_udf
-		# 	template = present_udf
 		# KG 鎖に設定
 		time = [0.01, 100000, 1000]
 		batch = self.make_title(batch, "Calculating-KG")
@@ -428,7 +406,7 @@ class SetUpUDF:
 		pre = read_udf
 		template = present_udf
 		# ステップワイズに圧力増加
-		for pres in [0.2, 0.5, 1.0, 2.0, 5.0, 6.5]:
+		for pres in self.step_press:
 			batch = self.make_title(batch, "Calculating-Ini_NPT_" + str(pres).replace('.', '_'))
 			fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
 			time = [0.01, 100000, 1000]
@@ -437,25 +415,6 @@ class SetUpUDF:
 			self.npt_setup(template, pre, present_udf, time, pres)
 			pre = read_udf
 			template = present_udf
-		# ステップワイズに圧力増加
-		# for pres in [1.0, 2.0, 5.0]:
-		# 	batch = self.make_title(batch, "Calculating-Step_NPT")
-		# 	fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
-		# 	time = [0.01, 100000, 1000]
-		# 	f_eval = 1
-		# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		# 	self.npt_setup(template, pre, present_udf, time, pres)
-		# 	pre = read_udf
-		# 	template = present_udf
-		# for pres in [6.0, 7.0]:
-		# 	batch = self.make_title(batch, "Calculating-Step_NPT")
-		# 	fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
-		# 	time = [0.01, 100000, 1000]
-		# 	f_eval = 1
-		# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		# 	self.npt_setup(template, pre, present_udf, time, pres)
-		# 	pre = read_udf
-		# 	template = present_udf
 		# KG 鎖に設定
 		time = [0.01, 100000, 1000]
 		batch = self.make_title(batch, "Calculating-KG")

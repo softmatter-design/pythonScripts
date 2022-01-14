@@ -12,16 +12,18 @@ import os
 # Initial_UDF の作成
 ##########################################
 class MakeInitUDF:
-	def __init__(self, sim_cond, target_cond, files_cond, names, target_name, calcd_data_dic, expand, condition_text):
+	def __init__(self, basic_cond, sim_cond, target_cond, names, target_name, calcd_data_dic, condition_text):
 		#
 		self.nw_model = sim_cond[0]
 		self.nw_type = sim_cond[1]
 		self.n_segments = sim_cond[2]
 		self.n_cell = sim_cond[3]
 		self.target_density = sim_cond[5]
-		self.n_strand = sim_cond[6]
-		self.l_bond = sim_cond[7]
-		self.c_n = sim_cond[8]
+		self.expand = sim_cond[6]
+		self.n_strand = sim_cond[7]
+		self.l_bond = sim_cond[8]
+		self.c_n = sim_cond[9]
+		self.step_press = sim_cond[10]
 		#
 		self.system_size = target_cond[0]
 		self.unit_cell = target_cond[1]
@@ -31,10 +33,10 @@ class MakeInitUDF:
 		self.multi = target_cond[5]
 		self.n_solvent = target_cond[6]
 		#
-		self.ver_cognac = files_cond[0]
-		self.blank_udf = files_cond[1]
-		self.base_udf = files_cond[2]
-		self.core = ' -n ' + str(files_cond[3])
+		self.ver_cognac = basic_cond[0]
+		self.blank_udf = basic_cond[1]
+		self.base_udf = basic_cond[2]
+		self.core = ' -n ' + str(basic_cond[3])
 		# Cognac用の名称設定
 		self.nw_name = names[0]
 		self.atom_name = names[1]
@@ -46,7 +48,6 @@ class MakeInitUDF:
 		#
 		self.target_name = target_name
 		self.calcd_data_dic = calcd_data_dic
-		self.expand = expand
 		self.cond_txt = condition_text
 		# 条件設定
 		# [R0, K]
