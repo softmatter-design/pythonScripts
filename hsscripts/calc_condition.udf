@@ -99,11 +99,11 @@
 		
 
 \begin{data}
-CalcCond:{"cognac101",1}
+CalcCond:{"cognac112",1}
 SimulationCond:{
  {"Regular_NW",{"4_Chain"}{"4_Chain"}}
  {
-  "Gel_concd_entangled",
+  "Multi_entangled",
   {20,3}
   {
    20,
