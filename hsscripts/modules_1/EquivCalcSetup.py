@@ -16,8 +16,8 @@ class SetUpUDF:
 		self.base_udf = basic_cond[2]
 		self.core = ' -n ' + str(basic_cond[3])
 		# 
-		self.calc_type = sim_cond[1]
-		self.step_press = sim_cond[10]
+		self.nw_type = sim_cond[2]
+		self.step_press = sim_cond[11]
 		#
 		self.target_name = target_name
 		self.f_eval_py = 'evaluate_all.py'
@@ -42,29 +42,20 @@ class SetUpUDF:
 
 		###############
 		# nw_typeに応じて計算条件を選択
-		if self.calc_type == "homo_KG":
+		if self.nw_type == "homo_KG":
 			print("making homo KG")
 			batch = self.homo_kg(batch)
 			# 評価用のパイソンスクリプトを作成
 			self.evaluate_setup("chain")
-		elif self.calc_type == "homo_sunuke":
-			print("making homo sunuke")
-			batch = self.homo_sunuke(batch)
-			# 評価用のパイソンスクリプトを作成
-			self.evaluate_setup("chain")
-		elif self.calc_type == "KG_entangled" or self.calc_type == "KG_multi":
+		elif self.nw_type == "Entangled" or self.nw_type == "Multi_entangled" or self.nw_type == "Gel_entangled" or self.nw_type == "Gel_concd_entangled":
 			batch = self.kg_calc(batch)
 			# 評価用のパイソンスクリプトを作成
 			self.evaluate_setup("strand")
-		elif self.calc_type == "Sunuke":
-			batch = self.sunuke_calc(batch)
-			# 評価用のパイソンスクリプトを作成
-			self.evaluate_setup("strand")
-		elif self.calc_type == "KG_NPT" or self.calc_type == "KG_single":
+		elif self.nw_type == "NPT" or self.nw_type == "Multi":
 			batch = self.npt_calc(batch)
 			# 評価用のパイソンスクリプトを作成
 			self.evaluate_setup("strand")
-		elif self.calc_type == "KG_gel":
+		elif self.nw_type == "Gel" or self.nw_type == "Gel_concd":
 			batch = self.npt_gel(batch)
 			# 評価用のパイソンスクリプトを作成
 			self.evaluate_setup("strand")
@@ -181,54 +172,6 @@ class SetUpUDF:
 		return batch
 
 	######################################################################
-	# ホモポリマーのsunuke鎖の計算
-	def homo_sunuke(self, batch):
-		# Force Capped LJ によりステップワイズに初期化
-		r = 0.9558*2**(1/6)
-		batch = self.make_title(batch, "Calculating-Init")
-		fn_ext = ['Init_', '_uin.udf']
-		time = [0.002, 1000000, 10000]
-		f_eval = 0
-		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		self.step_nonbond_setup(self.base_udf, 'random', present_udf, time, r)
-		pre = read_udf
-		template = present_udf
-		# sunuke 鎖に設定
-		time = [0.01, 1000000, 10000]
-		batch = self.make_title(batch, "Calculating-KG")
-		fn_ext = ['Sunuke_', "_uin.udf"]
-		f_eval = 1
-		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		self.sunuke_setup(template, pre, present_udf, time)
-		pre = read_udf
-		template = present_udf
-		# 平衡化計算
-		repeat = 4
-		time = [0.01, 1000000, 5000]
-		for i in range(repeat):
-			# 平衡化
-			batch = self.make_title(batch, "Calculating-Eq_" + str(i))
-			fn_ext = ['Eq_' + str(i) + "_", "_uin.udf"]
-			f_eval = 1
-			present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-			self.eq_setup(template, pre, present_udf, time)
-			pre = read_udf
-			template = present_udf
-		# # グリーン久保
-		# repeat = 5
-		# time = [0.01, 2000000, 100000]
-		# for i in range(repeat):
-		# 	# 平衡化
-		# 	batch = self.make_title(batch, "Calculating-GK_" + str(i))
-		# 	fn_ext = ['GK_' + str(i) + "_", "_uin.udf"]
-		#	f_eval = 1
-		# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		# 	self.greenkubo_setup(template, pre, present_udf, time)
-		# 	pre = read_udf
-			template = present_udf
-		return batch
-
-	######################################################################
 	# KG鎖の計算
 	def kg_calc(self, batch):
 		# Force Capped LJ によりステップワイズに初期化
@@ -284,55 +227,6 @@ class SetUpUDF:
 		# 	self.greenkubo_setup(template, pre, present_udf, time)
 		# 	pre = read_udf
 		# 	template = present_udf
-		return batch
-
-	###############################################################
-	# スヌケ鎖の計算
-	def sunuke_calc(self, batch):
-		# Force Capped LJ により初期化
-		r = 1.1
-		batch = self.make_title(batch, "Calculating-Init")
-		fn_ext = ['Init_', '_uin.udf']
-		time = [0.001, 100000, 1000]
-		f_eval = 1
-		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		self.step_nonbond_setup(self.base_udf, '', present_udf, time, r)
-		pre = read_udf
-		template = present_udf
-
-		# sunuke 鎖に設定
-		time = [0.01, 200000, 2000]
-		batch = self.make_title(batch, "Calculating-sunuke")
-		fn_ext = ['Set_', "_uin.udf"]
-		f_eval = 1
-		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		self.sunuke_setup(template, pre, present_udf, time)
-		pre = read_udf
-		template = present_udf
-		# 平衡化計算
-		repeat = 4
-		time = [0.01, 1000000, 5000]
-		for i in range(repeat):
-			# 平衡化
-			batch = self.make_title(batch, "Calculating-Eq_" + str(i))
-			fn_ext = ['Eq_' + str(i) + "_", "_uin.udf"]
-			f_eval = 1
-			present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-			self.eq_setup(template, pre, present_udf, time)
-			pre = read_udf
-			template = present_udf
-		# # グリーン久保
-		# repeat = 5
-		# time = [0.01, 2000000, 100000]
-		# for i in range(repeat):
-		# 	# 平衡化
-		# 	batch = self.make_title(batch, "Calculating-GK_" + str(i))
-		# 	fn_ext = ['GK_' + str(i) + "_", "_uin.udf"]
-		#	f_eval = 1
-		# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		# 	self.greenkubo_setup(template, pre, present_udf, time)
-		# 	pre = read_udf
-			template = present_udf
 		return batch
 
 	###########################################
@@ -644,69 +538,6 @@ class SetUpUDF:
 			u.put(1.0,							p + 'Scale_1_4_Pair', [i])
 			u.put(1.0,							p + 'Lennard_Jones.sigma', [i])
 			u.put(1.0,							p + 'Lennard_Jones.epsilon', [i])
-		#--- Write UDF ---
-		u.write(os.path.join(self.target_dir, present_udf))
-		return
-
-	####################################
-	# スヌケ鎖をボンドをFENEで設定
-	def sunuke_setup(self, template, read_udf, present_udf, time):
-		u = UDFManager(os.path.join(self.target_dir, template))
-		# goto global data
-		u.jump(-1)
-		#--- Simulation_Conditions ---
-		# Dynamics_Conditions
-		p = 'Simulation_Conditions.Dynamics_Conditions.'
-		u.put(100000000., 	p + 'Max_Force')
-		u.put(time[0], 		p + 'Time.delta_T')
-		u.put(time[1], 		p + 'Time.Total_Steps')
-		u.put(time[2], 		p + 'Time.Output_Interval_Steps')
-		u.put(1.0, 			p + 'Temperature.Temperature')
-		u.put(0., 			p + 'Pressure_Stress.Pressure')
-		# Calc_Potential_Flags
-		p = 'Simulation_Conditions.Calc_Potential_Flags.'
-		u.put(1, p + 'Bond')
-		u.put(1, p + 'Angle')
-		u.put(0, p + 'Non_Bonding_Interchain')
-		u.put(0, p + 'Non_Bonding_1_3')
-		u.put(0, p + 'Non_Bonding_1_4')
-		u.put(0, p + 'Non_Bonding_Intrachain')
-		#--- Initial_Structure ---
-		# Initial_Unit_Cell
-		p = 'Initial_Structure.Initial_Unit_Cell.'
-		u.put(0.85, p + 'Density')
-		u.put([0, 0, 0, 90.0, 90.0, 90.0], p + 'Cell_Size')
-		# Generate_Method
-		if read_udf == '':
-			p = 'Initial_Structure.Generate_Method.'
-			u.put('Restart', 		p + 'Method')
-			u.put(['', -1, 0, 0], 	p + 'Restart')
-		else:
-			p = 'Initial_Structure.Generate_Method.'
-			u.put('Restart', p+'Method')
-			u.put([read_udf, -1, 1, 0], p+'Restart')
-		# Relaxation
-		p = 'Initial_Structure.Relaxation.'
-		u.put(1, p + 'Relaxation')
-		u.put('DYNAMICS', p + 'Method')
-		u.put(200, p + 'Max_Relax_Force')
-		u.put(10000, p + 'Max_Relax_Steps')
-		#--- Simulation_Conditions ---
-		# Bond
-		p = 'Molecular_Attributes.Bond_Potential[].'		
-		for i, bondname in enumerate(self.bond_name):
-			u.put(bondname, 	p + 'Name', [i])
-			if read_udf == '':
-				u.put('Harmonic', 	p + 'Potential_Type', [i])
-				u.put(0.97,			p + 'R0', [i])
-				u.put(1000, 		p + 'Harmonic.K', [i])
-			else:
-				u.put('FENE_LJ', 	p + 'Potential_Type', [i])
-				u.put(1.0,			p + 'R0', [i])
-				u.put(1.5,			p + 'FENE_LJ.R_max', [i])
-				u.put(30,			p + 'FENE_LJ.K', [i])
-				u.put(1.0,			p + 'FENE_LJ.sigma', [i])
-				u.put(1.0,			p + 'FENE_LJ.epsilon', [i])
 		#--- Write UDF ---
 		u.write(os.path.join(self.target_dir, present_udf))
 		return

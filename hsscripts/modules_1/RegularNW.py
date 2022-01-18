@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 ################################################################################
 import sys
-import numpy as np
-
-# import platform
 from UDFManager import UDFManager
-import os
+# import os
+# import numpy as np
+# import platform
+
+
 ######################################
 ##### ネットワークの初期設定を行う #####
 ######################################
@@ -14,16 +15,17 @@ class InitialSetup:
 	def __init__(self, sim_cond):
 		#
 		self.nw_model = sim_cond[0]
-		self.nw_type = sim_cond[1]
-		self.n_segments = sim_cond[2]
-		self.n_cell = sim_cond[3]
-		self.multi_init = sim_cond[4]
-		self.target_density = sim_cond[5]
-		self.expand = sim_cond[6]
-		self.n_strand = sim_cond[7]
-		self.l_bond = sim_cond[8]
-		self.c_n = sim_cond[9]
-		self.step_press = sim_cond[10]
+		self.strand = sim_cond[1]
+		self.nw_type = sim_cond[2]
+		self.n_segments = sim_cond[3]
+		self.n_cell = sim_cond[4]
+		self.multi_init = sim_cond[5]
+		self.target_density = sim_cond[6]
+		self.expand = sim_cond[7]
+		self.n_strand = sim_cond[8]
+		self.l_bond = sim_cond[9]
+		self.c_n = sim_cond[10]
+		self.step_press = sim_cond[11]
 	##########################################
 	##### ネットワークポリマーの諸量を計算 ######
 	##########################################
@@ -41,23 +43,23 @@ class InitialSetup:
 		structure = "Regular_NW"
 		e2e = self.l_bond*((self.n_segments + 1)*self.c_n)**0.5	# 理想鎖状態での末端間距離
 		#
-		if self.nw_model == "3_Chain_S":
+		if self.strand == "3_Chain_S":
 			n_chains = 12						        # サブチェインの本数
 			n_p_unit = 8 + self.n_segments*n_chains		# ユニットセル当たりの粒子数
 			a_cell = (2*2**0.5)*e2e				        # 理想鎖状態でのユニットセル長
-		elif self.nw_model == "3_Chain_D":
+		elif self.strand == "3_Chain_D":
 			n_chains = 24						        # サブチェインの本数
 			n_p_unit = 16 + self.n_segments*n_chains	# ユニットセル当たりの粒子数
 			a_cell = (2*2**0.5)*e2e				        # 理想鎖状態でのユニットセル長
-		elif self.nw_model == "4_Chain":
+		elif self.strand == "4_Chain":
 			n_chains = 16						        # サブチェインの本数
 			n_p_unit = 8 + self.n_segments*n_chains		# ユニットセル当たりの粒子数
 			a_cell = (4*3**0.5)*e2e/3			        # 理想鎖状態でのユニットセル長
-		elif self.nw_model == "6_Chain":
+		elif self.strand == "6_Chain":
 			n_chains = 3						        # サブチェインの本数
 			n_p_unit = 1 + self.n_segments*n_chains		# ユニットセル当たりの粒子数
 			a_cell = e2e						            # 理想鎖状態でのユニットセル長
-		elif self.nw_model == "8_Chain":
+		elif self.strand == "8_Chain":
 			n_chains = 8						        # サブチェインの本数
 			n_p_unit = 2 + self.n_segments*n_chains     # ユニットセル当たりの粒子数
 			a_cell = (2*3**0.5)*e2e/3					# 理想鎖状態でのユニットセル長
@@ -74,7 +76,7 @@ class InitialSetup:
 			total_net_atom = int(self.multi*single_net_atom)    			# 全システム中のネットワーク粒子数
 			system = (total_net_atom/self.target_density)**(1/3)			# その際のシステムサイズ
 			nu = n_chains*self.multi/a_cell**3.								# ストランドの数密度
-		elif self.nw_type == "KG_single" or self.nw_type == "Sunuke_dens":
+		elif self.nw_type == "KG_multi" or self.nw_type == "Sunuke_dens":
 			self.multi = self.multi_init
 			org_system = a_cell*self.n_cell							# e2e から決めたシステムサイズ
 			single_net_atom = int(n_p_unit*self.n_cell**3.)	    # 一つのネットワーク中の粒子数
@@ -111,11 +113,11 @@ class InitialSetup:
 			sys.exit("Something Wrong!!")
 		#
 		text = "#########################################" + "\n"
-		text += "ネットワークモデル\t\t" + str(self.nw_model) + "\n"
+		text += "ネットワークモデル\t\t" + str(self.strand) + "\n"
 		text += "ネットワークタイプ\t\t" + str(self.nw_type) + "\n"
 		text += "ストランド中のセグメント数\t" + str(self.n_segments) + "\n"
-		text += "特性比：\t\t\t" + str(round(self.c_n,2)) + "\n"
-		text += "末端間距離：\t\t\t" + str(round(e2e,5)) + "\n"
+		text += "特性比:\t\t\t" + str(round(self.c_n,2)) + "\n"
+		text += "末端間距離:\t\t\t" + str(round(e2e,5)) + "\n"
 		text += "一辺当たりの単位ユニット数\t" + str(self.n_cell) + "\n"
 		text += "#########################################" + "\n"
 		if self.nw_type == "KG_entangled" or self.nw_type == "KG_NPT":
@@ -133,14 +135,14 @@ class InitialSetup:
 				self.prompt()
 			else:
 				self.prompt()
-		elif self.nw_type == "KG_single" or self.nw_type == "Sunuke_dens":
+		elif self.nw_type == "KG_multi" or self.nw_type == "Sunuke_dens":
 			text += "当初のシステムサイズ:\t\t" + str(round(org_system, 4)) + "\n"
 			text += "多重度:\t\t\t\t" + str(self.multi) + "\n"
 			text += "設定密度:\t\t\t" + str(self.target_density) + "\n"
 			text += "セグメント数:\t\t\t" + str(total_net_atom) + "\n"
 			text += "収縮比:\t\t\t\t" + str(round(shrinkage, 4)) + "\n"
 			text += "ステップ圧力:\t\t" + ', '.join(map(str, self.step_press)) + "\n"
-			text += "収縮後の末端間距離：\t\t" + str(round(mod_e2e,5)) + "\n"
+			text += "収縮後の末端間距離:\t\t" + str(round(mod_e2e,5)) + "\n"
 			text += "収縮後のシステムサイズ:\t\t" + str(round(system, 4)) + "\n"
 			text += "ストランドの数密度:\t\t" + str(round(nu, 5)) + "\n"
 			text += "#########################################" + "\n"
@@ -192,8 +194,34 @@ class InitialSetup:
 	###################
 	# target_nameを決める。
 	def set_target_name(self):
-		target_name = str(self.nw_type ) + "_" + str(self.nw_model) + '_N_' + str(self.n_segments) + "_Cells_" + str(self.n_cell) + "_Multi_" + str(self.multi)
+		target_name = str(self.nw_type ) + "_" + str(self.strand) + '_N_' + str(self.n_segments) + "_Cells_" + str(self.n_cell) + "_Multi_" + str(self.multi)
 		return target_name
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	################################################################################
 	# ネットワーク設定の計算
@@ -209,7 +237,7 @@ class InitialSetup:
 	def calc_jp_subChains(self):
 		# jp_xyz は、JPの座標のリスト
 		# subchain_se_xyz は、サブチェインの出発点と終点のリスト
-		if self.nw_model == "3_Chain_S":
+		if self.strand == "3_Chain_S":
 			# JPを設定
 			jp_xyz = [
 			[
@@ -241,7 +269,7 @@ class InitialSetup:
 			]
 			]
 
-		elif self.nw_model == "3_Chain_D":
+		elif self.strand == "3_Chain_D":
 			# JPを設定
 			jp_xyz = [
 			[
@@ -297,7 +325,7 @@ class InitialSetup:
 			]
 			]
 
-		elif self.nw_model == "4_Chain":
+		elif self.strand == "4_Chain":
 			# JPを設定
 			jp_xyz = [
 			[
@@ -333,7 +361,7 @@ class InitialSetup:
 			]
 			]
 
-		elif self.nw_model == "6_Chain":
+		elif self.strand == "6_Chain":
 			# JPを設定
 			jp_xyz = [
 			[
@@ -349,7 +377,7 @@ class InitialSetup:
 			]
 			]
 
-		elif self.nw_model == "8_Chain":
+		elif self.strand == "8_Chain":
 			# JPを設定
 			jp_xyz = [
 			[

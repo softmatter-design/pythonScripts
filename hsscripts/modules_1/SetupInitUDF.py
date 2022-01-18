@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ################################################################################
-import sys
+# import sys
+# from unittest import TextTestResult
 import numpy as np
-
+import os
 # import platform
 from UDFManager import UDFManager
-import os
+
 
 ##########################################
 # Initial_UDF の作成
@@ -15,15 +16,17 @@ class MakeInitUDF:
 	def __init__(self, basic_cond, sim_cond, target_cond, names, target_name, calcd_data_dic, condition_text):
 		#
 		self.nw_model = sim_cond[0]
-		self.nw_type = sim_cond[1]
-		self.n_segments = sim_cond[2]
-		self.n_cell = sim_cond[3]
-		self.target_density = sim_cond[5]
-		self.expand = sim_cond[6]
-		self.n_strand = sim_cond[7]
-		self.l_bond = sim_cond[8]
-		self.c_n = sim_cond[9]
-		self.step_press = sim_cond[10]
+		self.strand = sim_cond[1]
+		self.nw_type = sim_cond[2]
+		self.n_segments = sim_cond[3]
+		self.n_cell = sim_cond[4]
+		self.multi_init = sim_cond[5]
+		self.target_density = sim_cond[6]
+		self.expand = sim_cond[7]
+		self.n_strand = sim_cond[8]
+		self.l_bond = sim_cond[9]
+		self.c_n = sim_cond[10]
+		self.step_press = sim_cond[11]
 		#
 		self.system_size = target_cond[0]
 		self.unit_cell = target_cond[1]
@@ -100,7 +103,7 @@ class MakeInitUDF:
 		# Solver
 		p = 'Simulation_Conditions.Solver.'
 		u.put('Dynamics', p + 'Solver_Type')
-		if self.nw_type == "KG_NPT" or self.nw_type == 'KG_single' or self.nw_type == "KG_gel":
+		if self.nw_type == "NPT" or self.nw_type == 'Multi' or self.nw_type == "Gel" or self.nw_type == "Gel_concd":
 			u.put('NPT_Andersen_Kremer_Grest', 	p + 'Dynamics.Dynamics_Algorithm')
 			u.put(self.total_atom, 				p + 'Dynamics.NPT_Andersen_Kremer_Grest.Cell_Mass')
 			u.put(0.5, 							p + 'Dynamics.NPT_Andersen_Kremer_Grest.Friction')
@@ -147,7 +150,7 @@ class MakeInitUDF:
 		#--- Initial_Structure ---
 		# Initial_Unit_Cell
 		p = 'Initial_Structure.Initial_Unit_Cell.'
-		if self.nw_type == "KG_NPT" or self.nw_type == 'KG_single' or self.nw_type == "KG_gel":
+		if self.nw_type == "NPT" or self.nw_type == 'Multi' or self.nw_type == "Gel" or self.nw_type == "Gel_concd":
 			p = 'Initial_Structure.Initial_Unit_Cell.'
 			u.put(0, p + 'Density')
 			u.put([self.system_size*self.expand, self.system_size*self.expand, self.system_size*self.expand, 90.0, 90.0, 90.0], p + 'Cell_Size')
@@ -275,7 +278,7 @@ class MakeInitUDF:
 			shift_vec = self.expand*count*shift*np.array(np.random.rand(3))
 			pos_all = self.calcd_data_dic[mul]["pos_all"]
 			for i in range(len(pos_all)):
-				if self.nw_type == "KG_NPT" or self.nw_type == 'KG_single' or self.nw_type == "KG_gel":
+				if self.nw_type == "NPT" or self.nw_type == 'Multi' or self.nw_type == "Gel"  or self.nw_type == "Gel_concd":
 					mod_pos = self.expand*self.unit_cell*np.array(list(pos_all[i])) + self.expand*shift_vec
 				else:
 					mod_pos = self.unit_cell*np.array(list(pos_all[i])) + shift_vec

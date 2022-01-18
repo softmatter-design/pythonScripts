@@ -3,11 +3,8 @@
 ################################################################
 import modules_1
 ################################################################
-# 
-basic_cond, sim_cond, names = modules_1.ReadNWConditions.setupcondition()
-# ネットワークポリマーの諸量を計算
-init = modules_1.RegularNW.InitialSetup(sim_cond)
-target_cond, target_name, calcd_data_dic, condition_text = init.calc_conditions()
+# 設定条件を読み込み、ネットワークポリマーの諸量を計算
+basic_cond, sim_cond, names, target_cond, target_name, calcd_data_dic, condition_text = modules_1.ReadNWConditions.setupcondition()
 ##################
 # baseUDF の作成
 baseudf = modules_1.SetupInitUDF.MakeInitUDF(basic_cond, sim_cond, target_cond, names, target_name, calcd_data_dic, condition_text)

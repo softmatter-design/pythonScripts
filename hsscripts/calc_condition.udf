@@ -1,78 +1,109 @@
 
-		\begin{def}
-			Basics:{
-				Cognac_ver:select{
-					"cognac101", 
-					"cognac112"
-					}, // Cognac version
-				Cores: int // ŒvZ‚Ég—p‚·‚éƒRƒA”‚ğw’è
-				}
+	\begin{def}
+		CalcCond:{
+			Cognac_ver:select{
+				"cognac101", 
+				"cognac112"
+				}, // Cognac version
+			Cores: int // è¨ˆç®—ã«ä½¿ç”¨ã™ã‚‹ã‚³ã‚¢æ•°ã‚’æŒ‡å®š
+			}
 
-			SimulationCond:{
+		SimulationCond:{
+			Model:{
 				TargetModel:select{ 
-					"3_Chain_S", 
-					"3_Chain_D", 
-					"4_Chain", 
-					"6_Chain", 
-					"8_Chain"
+						"Regular_NW",
+						"Random_NW"
 					},
-				Type:{
-					NWType:select{
-						"KG_entangled",   // –§“xA––’[ŠÔ‹——£‚ğİ’è’l‚É‡‚í‚¹‚é‚æ‚¤‚É‘½d“x‚ğ•Ï‰»B —‚İ‡‚¢‚ª“ü‚é‚æ‚¤‚É‰Šú‰»
-						"KG_NPT",		    // –§“xA––’[ŠÔ‹——£‚ğİ’è’l‚É‡‚í‚¹‚é‚æ‚¤‚É‘½d“x‚ğ•Ï‰»B —‚İ‡‚¢‚ª“ü‚ç‚È‚¢‚æ‚¤‚ÉNPT‚Åk‚ß‚é
-						"KG_single",    	// İ’è‚µ‚½‘½d“x‚ÅA–§“x‚ğİ’è’l‚É‚È‚é‚æ‚¤‚ÉAƒVƒXƒeƒ€ƒTƒCƒY‚ğk‚ß‚é
-						"KG_gel",	    	// İ’è‚µ‚½‘½d“x‚ÅA–§“xA––’[ŠÔ‹——£‚ğİ’è’l‚É‡‚í‚¹‚é‚æ‚¤‚ÉA—nÜ‚ğ“Y‰Á
-						"Sunuke",	    	// İ’è‚µ‚½‘½d“x‚Å––’[ŠÔ‹——£‚ğİ’è’l‚É‡‚í‚¹‚é‚æ‚¤‚ÉA–§“x‚ğ–³‹‚µ‚ÄƒXƒkƒP½‚ğİ’è
-						"Sunuke_dens"       // İ’è‚µ‚½‘½d“xAİ’è‚µ‚½–§“x‚Æ‚È‚é‚æ‚¤‚ÉƒVƒXƒeƒ€ƒTƒCƒY‚ğk‚ß‚ÄƒXƒkƒP½‚ğİ’è
-						},
-						KG_entangled:{
-							N_Segments: int,
-							N_UnitCells: int,
-						},
-						KG_NPT:{
-							N_Segments: int,
-							N_UnitCells: int,
-							ExpansionRatio: float
-							StepPress[]: float
-						},
-						KG_single:{
-							N_Segments: int,
-							N_UnitCells: int,
-							Multiplicities: int,
-							ExpansionRatio: float
-							StepPress[]: float
-						},
-						KG_gel:{
-							N_Segments: int,
-							N_UnitCells: int,
-							Multiplicities: int,
-							ExpansionRatio: float
-							StepPress[]: float
-						},
-						Sunuke:{
-							N_Segments: int,
-							N_UnitCells: int,
-							Multiplicities: int,
-							ExpansionRatio: float
-						},
-						Sunuke_dens:{
-							N_Segments: int,
-							N_UnitCells: int,
-							Multiplicities: int,
-							ExpansionRatio: float
+					Regular_NW:{
+						chains:select{
+							"3_Chain_S", 
+							"3_Chain_D", 
+							"4_Chain", 
+							"6_Chain", 
+							"8_Chain"
+						}
+					},
+					Random_NW:{
+						chains:select{
+						"3_Chain", 
+						"4_Chain", 
+						"5_Chain", 
+						"6_Chain", 
+						"7_Chain", 
+						"8_Chain"
 						}
 					}
-				target_density:float
 				}
-		\end{def}
+			Type:{
+				SimType:select{
+					"Entangled",   // å¯†åº¦ã€æœ«ç«¯é–“è·é›¢ã‚’è¨­å®šå€¤ã«åˆã‚ã›ã‚‹ã‚ˆã†ã«å¤šé‡åº¦ã‚’å¤‰åŒ–ã€‚ çµ¡ã¿åˆã„ãŒå…¥ã‚‹ã‚ˆã†ã«åˆæœŸåŒ–
+					"NPT",		    // å¯†åº¦ã€æœ«ç«¯é–“è·é›¢ã‚’è¨­å®šå€¤ã«åˆã‚ã›ã‚‹ã‚ˆã†ã«å¤šé‡åº¦ã‚’å¤‰åŒ–ã€‚ çµ¡ã¿åˆã„ãŒå…¥ã‚‰ãªã„ã‚ˆã†ã«NPTã§ç¸®ã‚ã‚‹
+					"Multi",    	// è¨­å®šã—ãŸå¤šé‡åº¦ã§ã€å¯†åº¦ã‚’è¨­å®šå€¤ã«ãªã‚‹ã‚ˆã†ã«ã€ã‚·ã‚¹ãƒ†ãƒ ã‚µã‚¤ã‚ºã‚’ç¸®ã‚ã‚‹
+					"Multi_entangled",	// è¨­å®šã—ãŸå¤šé‡åº¦ã§ã€å¯†åº¦ã‚’è¨­å®šå€¤ã«ãªã‚‹ã‚ˆã†ã«ã€ã‚·ã‚¹ãƒ†ãƒ ã‚µã‚¤ã‚ºã‚’ç¸®ã‚ã€çµ¡ã¿åˆã„ãŒå…¥ã‚‹ã‚ˆã†ã«åˆæœŸåŒ–
+					"Gel",    	// è¨­å®šã—ãŸå¤šé‡åº¦ã§ã€å¯†åº¦ã€æœ«ç«¯é–“è·é›¢ã‚’è¨­å®šå€¤ã«åˆã‚ã›ã‚‹ã‚ˆã†ã«æº¶å‰¤ã‚’æ·»åŠ 
+					"Gel_entangled",	// è¨­å®šã—ãŸå¤šé‡åº¦ã§ã€å¯†åº¦ã€æœ«ç«¯é–“è·é›¢ã‚’è¨­å®šå€¤ã«åˆã‚ã›ã‚‹ã‚ˆã†ã«æº¶å‰¤ã‚’æ·»åŠ ã€çµ¡ã¿åˆã„ãŒå…¥ã‚‹ã‚ˆã†ã«åˆæœŸåŒ–
+					"Gel_concd",	// è¨­å®šã—ãŸå¤šé‡åº¦ã§ã€æº¶å‰¤é‡å¤‰åŒ–
+					"Gel_concd_entangled"	// è¨­å®šã—ãŸå¤šé‡åº¦ã§ã€æº¶å‰¤é‡å¤‰åŒ–ã€çµ¡ã¿åˆã„ãŒå…¥ã‚‹ã‚ˆã†ã«åˆæœŸåŒ–
+					},
+					Entangled:{
+						N_Segments: int,
+						N_UnitCells: int,
+					},
+					NPT:{
+						N_Segments: int,
+						N_UnitCells: int,
+						ExpansionRatio: float,
+						StepPress[]: float
+					},
+					Multi:{
+						N_Segments: int,
+						N_UnitCells: int,
+						Multiplicities: int,
+						ExpansionRatio: float,
+						StepPress[]: float
+					},
+					Multi_entangled:{
+						N_Segments: int,
+						N_UnitCells: int,
+						Multiplicities: int
+					},
+					Gel:{
+						N_Segments: int,
+						N_UnitCells: int,
+						Multiplicities: int,
+						ExpansionRatio: float,
+						StepPress[]: float
+					},
+					Gel_entangled:{
+						N_Segments: int,
+						N_UnitCells: int,
+						Multiplicities: int
+					},
+					Gel_concd:{
+						N_Segments: int,
+						N_UnitCells: int,
+						Multiplicities: int
+						NV: float
+					},
+					Gel_concd_entangled:{
+						N_Segments: int,
+						N_UnitCells: int,
+						Multiplicities: int
+						NV: float
+					}
+				}
+			target_density:float
+			}
+	\end{def}
 
-				
+		
+
 \begin{data}
-Basics:{"cognac101",1}
+CalcCond:{"cognac101",1}
 SimulationCond:{
- "6_Chain",
+ {"Regular_NW",{"4_Chain"}{"4_Chain"}}
  {
-  "KG_single",
+  "Gel_concd_entangled",
   {20,3}
   {
    20,
@@ -82,11 +113,12 @@ SimulationCond:{
   }
   {
    20,
-   4,
+   3,
    1,
    2.0000000,
    [0.2000000,0.5000000,1.0000000,2.0000000,5.0000000,6.5000000,7.0000000]
   }
+  {20,3,1}
   {
    20,
    3,
@@ -94,8 +126,9 @@ SimulationCond:{
    2.0000000,
    [0.2000000,0.5000000,1.0000000,2.0000000,5.0000000,6.5000000,7.0000000]
   }
-  {20,3,3,3.0000000}
-  {20,3,3,3.0000000}
+  {20,3,2}
+  {20,3,2,0.5000000}
+  {20,3,2,0.5000000}
  }
  0.8500000
 }
