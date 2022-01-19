@@ -1,14 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ################################################################################
-# import sys
-# from unittest import TextTestResult
 import numpy as np
 import os
-# import platform
 from UDFManager import UDFManager
-
-
 ##########################################
 # Initial_UDF の作成
 ##########################################

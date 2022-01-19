@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ################################################################################
-import numpy as np
+# import numpy as np
 import platform
-from UDFManager import UDFManager
 import os
+from UDFManager import UDFManager
 ##########################################
 # UDF の作成
 ##########################################
@@ -51,14 +51,14 @@ class SetUpUDF:
 			batch = self.kg_calc(batch)
 			# 評価用のパイソンスクリプトを作成
 			self.evaluate_setup("strand")
-		elif self.nw_type == "NPT" or self.nw_type == "Multi":
+		elif self.nw_type == "NPT" or self.nw_type == "Multi" or self.nw_type == "Gel" or self.nw_type == "Gel_concd":
 			batch = self.npt_calc(batch)
 			# 評価用のパイソンスクリプトを作成
 			self.evaluate_setup("strand")
-		elif self.nw_type == "Gel" or self.nw_type == "Gel_concd":
-			batch = self.npt_gel(batch)
-			# 評価用のパイソンスクリプトを作成
-			self.evaluate_setup("strand")
+		# elif self.nw_type == "Gel" or self.nw_type == "Gel_concd":
+		# 	batch = self.npt_gel(batch)
+		# 	# 評価用のパイソンスクリプトを作成
+		# 	self.evaluate_setup("strand")
 
 		#####################
 		# バッチファイルを作成
@@ -178,7 +178,7 @@ class SetUpUDF:
 		r = 1.1
 		batch = self.make_title(batch, "Calculating-Init")
 		fn_ext = ['Init_', "_uin.udf"]
-		time = [0.001, 500000, 5000]
+		time = [0.001, 100000, 1000]
 		f_eval = 1
 		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
 		self.step_nonbond_setup(self.base_udf, '', present_udf, time, r)
@@ -288,47 +288,47 @@ class SetUpUDF:
 
 	###########################################
 	# NPT 条件で、設定密度まで圧縮（ゲルの場合は圧縮をきつく）
-	def npt_gel(self, batch):
-		# NPTの設定
-		pres = 0.1
-		batch = self.make_title(batch, "Calculating-Ini_NPT_" + str(pres).replace('.', '_'))
-		fn_ext = ['Init_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
-		time = [0.001, 20000, 200]
-		f_eval = 0
-		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		self.npt_setup(self.base_udf, '', present_udf, time, pres)
-		pre = read_udf
-		template = present_udf
-		# ステップワイズに圧力増加
-		for pres in self.step_press:
-			batch = self.make_title(batch, "Calculating-Ini_NPT_" + str(pres).replace('.', '_'))
-			fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
-			time = [0.01, 100000, 1000]
-			f_eval = 1
-			present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-			self.npt_setup(template, pre, present_udf, time, pres)
-			pre = read_udf
-			template = present_udf
-		# KG 鎖に設定
-		time = [0.01, 100000, 1000]
-		batch = self.make_title(batch, "Calculating-KG")
-		fn_ext = ['Setup_', "_uin.udf"]
-		f_eval = 1
-		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-		self.kg_setup(template, pre, present_udf, time)
-		pre = read_udf
-		template = present_udf
-		# 平衡化計算
-		time = [0.01, 200000, 1000]
-		for i in range(5):
-			# 平衡化
-			batch = self.make_title(batch, "Calculating-Eq_" + str(i))
-			fn_ext = ['Eq_' + str(i) + "_", "_uin.udf"]
-			f_eval = 1
-			present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
-			self.eq_setup(template, pre, present_udf, time)
-			pre = read_udf
-			template = present_udf
+	# def npt_gel(self, batch):
+	# 	# NPTの設定
+	# 	pres = 0.1
+	# 	batch = self.make_title(batch, "Calculating-Ini_NPT_" + str(pres).replace('.', '_'))
+	# 	fn_ext = ['Init_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
+	# 	time = [0.001, 20000, 200]
+	# 	f_eval = 0
+	# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+	# 	self.npt_setup(self.base_udf, '', present_udf, time, pres)
+	# 	pre = read_udf
+	# 	template = present_udf
+	# 	# ステップワイズに圧力増加
+	# 	for pres in self.step_press:
+	# 		batch = self.make_title(batch, "Calculating-Ini_NPT_" + str(pres).replace('.', '_'))
+	# 		fn_ext = ['Compress_pres_' + str(pres).replace('.', '_') + '_', "_uin.udf"]
+	# 		time = [0.01, 100000, 1000]
+	# 		f_eval = 1
+	# 		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+	# 		self.npt_setup(template, pre, present_udf, time, pres)
+	# 		pre = read_udf
+	# 		template = present_udf
+	# 	# KG 鎖に設定
+	# 	time = [0.01, 100000, 1000]
+	# 	batch = self.make_title(batch, "Calculating-KG")
+	# 	fn_ext = ['Setup_', "_uin.udf"]
+	# 	f_eval = 1
+	# 	present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+	# 	self.kg_setup(template, pre, present_udf, time)
+	# 	pre = read_udf
+	# 	template = present_udf
+	# 	# 平衡化計算
+	# 	time = [0.01, 200000, 1000]
+	# 	for i in range(5):
+	# 		# 平衡化
+	# 		batch = self.make_title(batch, "Calculating-Eq_" + str(i))
+	# 		fn_ext = ['Eq_' + str(i) + "_", "_uin.udf"]
+	# 		f_eval = 1
+	# 		present_udf, read_udf, batch = self.make_step(time, fn_ext, batch, f_eval)
+	# 		self.eq_setup(template, pre, present_udf, time)
+	# 		pre = read_udf
+	# 		template = present_udf
 		# # グリーン久保
 		# repeat = 3
 		# time = [0.01, 2000000, 100000]
@@ -419,56 +419,36 @@ class SetUpUDF:
 				u.put(0.97,			p + 'R0', [i])
 				u.put(1000, 		p + 'Harmonic.K', [i])
 			else:
-				u.put('User_Bond', 	p + 'Potential_Type', [i])
+				u.put('Bond_Polynomial', 	p + 'Potential_Type', [i])
 				u.put(0.9609,		p + 'R0', [i])
-				u.put(1,			p + 'User_Bond.Index', [i])
-				#
-				u.put('sigma',		p + 'User_Bond.Parameters[].Name', [i, 0])
-				u.put('epsilon',	p + 'User_Bond.Parameters[].Name', [i, 1])
-				u.put('c0',			p + 'User_Bond.Parameters[].Name', [i, 2])
-				u.put('c1',			p + 'User_Bond.Parameters[].Name', [i, 3])
-				u.put('c2',			p + 'User_Bond.Parameters[].Name', [i, 4])
-				u.put('c3',			p + 'User_Bond.Parameters[].Name', [i, 5])
-				#
-				u.put('1.0',		p + 'User_Bond.Parameters[].Value', [i, 0])
-				u.put('1.0',		p + 'User_Bond.Parameters[].Value', [i, 1])
-				u.put('20.2026',	p + 'User_Bond.Parameters[].Value', [i, 2])
-				u.put('490.628',	p + 'User_Bond.Parameters[].Value', [i, 3])
-				u.put('2256.76',	p + 'User_Bond.Parameters[].Value', [i, 4])
-				u.put('9685.31',	p + 'User_Bond.Parameters[].Value', [i, 5])
+				u.put(3,			p + 'Bond_Polynomial.N', [i])
+				u.put(20.2026,	p + 'Bond_Polynomial.p[]', [i, 0])
+				u.put(490.628,	p + 'Bond_Polynomial.p[]', [i, 1])
+				u.put(2256.76,	p + 'Bond_Polynomial.p[]', [i, 2])
+				u.put(9685.31,	p + 'Bond_Polynomial.p[]', [i, 3])
+				u.put('YES',			p + 'Bond_Polynomial.Use_Equilibrated_Value', [i])
 		# Angle
 		for i, anglename in enumerate(self.angle_name):
 			p = 'Molecular_Attributes.Angle_Potential[].'
 			u.put(anglename, 		p + 'Name', [i])
-			u.put('User_Angle', 	p + 'Potential_Type', [i])
-			u.put(73, 				p + 'theta0', [i])
-			u.put(1, 				p + 'User_Angle.Index', [i])
-			#
-			u.put('sigma', 			p + 'User_Angle.Parameters[].Name', [i, 0])
-			u.put('epsilon', 		p + 'User_Angle.Parameters[].Name', [i, 1])
-			u.put('rfc', 			p + 'User_Angle.Parameters[].Name', [i, 2])
-			#
-			u.put('1.0', 			p + 'User_Angle.Parameters[].Value', [i, 0])
-			u.put('1.0', 			p + 'User_Angle.Parameters[].Value', [i, 1])
-			u.put('0.8', 			p + 'User_Angle.Parameters[].Value', [i, 2])
+			u.put('Force_Cap_LJ', 	p + 'Potential_Type', [i])
+			u.put(73.0, 				p + 'theta0', [i])
+			u.put(1.0, 			p + 'Force_Cap_LJ.sigma', [i])
+			u.put(1.0, 			p + 'Force_Cap_LJ.epsilon', [i])
+			u.put(1.122462, 		p + 'Force_Cap_LJ.cutoff', [i])
+			u.put(0.8, 			p + 'Force_Cap_LJ.r_FC', [i])
 		#--- Pair_Interaction[] ---
 		for i, pairname in enumerate(self.pair_name):
 			p = 'Interactions.Pair_Interaction[].'
 			u.put(pairname,   					p + 'Name', [i])
-			u.put('User_Pair_Interaction', 		p + 'Potential_Type', [i])
+			u.put('Force_Cap_LJ', 		p + 'Potential_Type', [i])
 			u.put(self.site_pair_name[i][0],	p + 'Site1_Name', [i])
 			u.put(self.site_pair_name[i][1],	p + 'Site2_Name', [i])
 			u.put(1.12246204830937,				p + 'Cutoff', [i])
 			u.put(1.0,							p + 'Scale_1_4_Pair', [i])
-			u.put(1,							p + 'User_Pair_Interaction.Index', [i])
-			#
-			u.put('sigma',						p + 'User_Pair_Interaction.Parameters[].Name', [i, 0])
-			u.put('epsilon',					p + 'User_Pair_Interaction.Parameters[].Name', [i, 1])
-			u.put('rfc',						p + 'User_Pair_Interaction.Parameters[].Name', [i, 2])
-			#
-			u.put('1.0',						p + 'User_Pair_Interaction.Parameters[].Value', [i, 0])
-			u.put('1.0',						p + 'User_Pair_Interaction.Parameters[].Value', [i, 1])
-			u.put(str(r_fc),						p + 'User_Pair_Interaction.Parameters[].Value', [i, 2])
+			u.put(1.0,							p + 'Force_Cap_LJ.sigma', [i])
+			u.put(1.0,							p + 'Force_Cap_LJ.epsilon', [i])
+			u.put(r_fc,							p + 'Force_Cap_LJ.r_FC', [i])
 		#--- Write UDF ---
 		u.write(os.path.join(self.target_dir, present_udf))
 		return

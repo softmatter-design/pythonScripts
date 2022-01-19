@@ -120,8 +120,8 @@ def readconditionudf():
 		n_cell = u.get('SimulationCond.Type.Gel_concd.N_UnitCells')
 		multi_init = u.get('SimulationCond.Type.Gel_concd.Multiplicities')
 		nv = u.get('SimulationCond.Type.Gel_concd.NV')
-		expand = 1.0
-		step_press = []
+		expand = u.get('SimulationCond.Type.Gel_concd.ExpansionRatio')
+		step_press = u.get('SimulationCond.Type.Gel_concd.StepPress[]')
 	elif sim_type == "Gel_concd_entangled":
 		n_segments = u.get('SimulationCond.Type.Gel_concd_entangled.N_Segments')
 		n_cell = u.get('SimulationCond.Type.Gel_concd_entangled.N_UnitCells')
@@ -270,12 +270,14 @@ def makenewudf():
 						N_Segments: int,
 						N_UnitCells: int,
 						Multiplicities: int
-						NV: float
+						NV: float,
+						ExpansionRatio: float,
+						StepPress[]: float
 					},
 					Gel_concd_entangled:{
 						N_Segments: int,
 						N_UnitCells: int,
-						Multiplicities: int
+						Multiplicities: int,
 						NV: float
 					}
 				}
@@ -301,7 +303,7 @@ def makenewudf():
 				{20, 3, 1},
 				{20, 3, 1, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
 				{20, 3, 2},
-				{20, 3, 2, 0.5},
+				{20, 3, 2, 0.5, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
 				{20, 3, 2, 0.5}
 			}
 		0.85
@@ -412,7 +414,7 @@ class InitialSetup:
 			total_net_atom = int(self.multi*single_net_atom)    # 全システム中のネットワーク粒子数
 			n_solvent = int(total_net_atom*(1.0 - self.nv)/self.nv)		# 溶媒の粒子数
 			total_atom = int(total_net_atom + n_solvent)		    # システム中の粒子総数
-			vol = total_net_atom/self.target_density			# システム体積
+			vol = total_atom/self.target_density			# システム体積
 			system = vol**(1./3.)							# システムサイズ
 			total_atom = int(vol*self.target_density)		    # システム中の粒子総数
 			nv = self.nv						# ネットワークの体積分率

@@ -83,12 +83,14 @@
 						N_Segments: int,
 						N_UnitCells: int,
 						Multiplicities: int
-						NV: float
+						NV: float,
+						ExpansionRatio: float,
+						StepPress[]: float
 					},
 					Gel_concd_entangled:{
 						N_Segments: int,
 						N_UnitCells: int,
-						Multiplicities: int
+						Multiplicities: int,
 						NV: float
 					}
 				}
@@ -103,7 +105,7 @@ CalcCond:{"cognac112",1}
 SimulationCond:{
  {"Regular_NW",{"4_Chain"}{"4_Chain"}}
  {
-  "Multi_entangled",
+  "Gel_entangled",
   {20,3}
   {
    20,
@@ -127,7 +129,14 @@ SimulationCond:{
    [0.2000000,0.5000000,1.0000000,2.0000000,5.0000000,6.5000000,7.0000000]
   }
   {20,3,2}
-  {20,3,2,0.5000000}
+  {
+   20,
+   3,
+   2,
+   0.5000000,
+   2.0000000,
+   [0.2000000,0.5000000,1.0000000,2.0000000,5.0000000,6.5000000,7.0000000]
+  }
   {20,3,2,0.5000000}
  }
  0.8500000
