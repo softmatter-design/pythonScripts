@@ -69,6 +69,20 @@ def readconditionudf():
 		strand = u.get('SimulationCond.Model.Regular_NW.chains')
 	elif nw_model == "Random_NW":
 		strand = u.get('SimulationCond.Model.Random_NW.chains')
+		calc = u.get('SimulationCond.Model.Random_NW.Calc_Topolpgy')
+		if calc == 'Read':
+			restartfile = u.get('SimulationCond.Model.Random_NW.Read.file_name')
+			if os.path.exists(restartfile):
+				print('Read existing file!')
+			else:
+				sys.exit('Cannnot find Read file !!')
+		elif calc == 'Calc':
+			print( u.get('SimulationCond.Model.Random_NW.Calc'))
+			pre_sampling = u.get('SimulationCond.Model.Random_NW.Calc.pre_sampling')
+			pre_trial = u.get('SimulationCond.Model.Random_NW.Calc.pre_try')
+			sampling = u.get('SimulationCond.Model.Random_NW.Calc.sampling')
+			trial = u.get('SimulationCond.Model.Random_NW.Calc.try')
+			print(pre_sampling, pre_trial, sampling, trial)
 	###################
 	## ポリマー鎖の設定
 	sim_type = u.get('SimulationCond.Type.SimType')
@@ -218,6 +232,19 @@ def makenewudf():
 						"6_Chain", 
 						"7_Chain", 
 						"8_Chain"
+						},
+						Calc_Topolpgy:select{
+						"Calc",
+						"Read"
+						},
+						Calc:{
+							pre_sampling:int,
+							pre_try:int,
+							sampling:int,
+							try:int
+							},
+						Read:{
+							file_name:string
 						}
 					}
 				}
@@ -294,7 +321,11 @@ def makenewudf():
 		SimulationCond:{
 			{"Regular_NW",
 				{"4_Chain"},
-				{"4_Chain"}
+				{"4_Chain",
+					"Calc",
+						{1000, 100, 1000, 1000},
+						{""}
+				}
 			}
 			{"NPT",
 				{20, 3},
