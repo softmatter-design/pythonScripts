@@ -77,12 +77,7 @@ def readconditionudf():
 			else:
 				sys.exit('Cannnot find Read file !!')
 		elif calc == 'Calc':
-			print( u.get('SimulationCond.Model.Random_NW.Calc'))
-			pre_sampling = u.get('SimulationCond.Model.Random_NW.Calc.pre_sampling')
-			pre_trial = u.get('SimulationCond.Model.Random_NW.Calc.pre_try')
-			sampling = u.get('SimulationCond.Model.Random_NW.Calc.sampling')
-			trial = u.get('SimulationCond.Model.Random_NW.Calc.try')
-			print(pre_sampling, pre_trial, sampling, trial)
+			cond_top = u.get('SimulationCond.Model.Random_NW.Calc')
 	###################
 	## ポリマー鎖の設定
 	sim_type = u.get('SimulationCond.Type.SimType')
