@@ -9,13 +9,7 @@ from UDFManager import UDFManager
 #######################################################
 #
 def setupcondition():
-	if not os.path.isfile('./calc_condition.udf'):
-		print()
-		print('In this directory, no "calc_condition.udf" is found !')
-		print('New one will be generated.')
-		print('Please, modify and save it !\n')
-		makenewudf()
-		input('Press ENTER to continue...')
+	findudf()
 
 	dic={'y':True,'yes':True,'q':False,'quit':False}
 	while True:
@@ -40,6 +34,85 @@ def setupcondition():
 	calcd_data_dic = init.calc_all()
 
 	return basic_cond, sim_cond, names, target_cond, target_name, calcd_data_dic, condition_text
+
+###########################################
+# 
+def findudf():
+	if not os.path.isfile('./calc_condition.udf'):
+		print()
+		print('In this directory, no "calc_condition.udf" is found !')
+		print('New one will be generated.')
+		print('Please, modify and save it !\n')
+		makenewudf()
+		input('Press ENTER to continue...')
+	return
+###########################################
+# 
+def makenewudf():
+	contents = '''
+	\\begin{def}
+		CalcCond:{
+			Cognac_ver:select{"cognac112"},
+			Cores: int // 計算に使用するコア数を指定
+			}
+		SimulationCond:{
+			Model:{TargetModel:select{"Regular_NW", "Random_NW"},
+				Regular_NW:{chains:select{"3_Chain_S", "3_Chain_D", "4_Chain", "6_Chain", "8_Chain"}
+					},
+				Random_NW:{chains:select{"3_Chain", "4_Chain", "5_Chain", "6_Chain", "7_Chain"},
+					Calc_Topolpgy:select{"Calc", "Read"},
+						Calc:{pre_sampling:int, pre_try:int, sampling:int, try:int},
+						Read:{file_name:string}
+					}
+				}
+			Type:{
+				SimType:select{
+					"Entangled",   // 密度、末端間距離を設定値に合わせるように多重度を変化。 絡み合いが入るように初期化
+					"NPT",		    // 密度、末端間距離を設定値に合わせるように多重度を変化。 絡み合いが入らないようにNPTで縮める
+					"Multi",    	// 設定した多重度で、密度を設定値になるように、システムサイズを縮める
+					"Multi_entangled",	// 設定した多重度で、密度を設定値になるように、システムサイズを縮め、絡み合いが入るように初期化
+					"Gel",    	// 設定した多重度で、密度、末端間距離を設定値に合わせるように溶剤を添加
+					"Gel_entangled",	// 設定した多重度で、密度、末端間距離を設定値に合わせるように溶剤を添加、絡み合いが入るように初期化
+					"Gel_concd",	// 設定した多重度で、溶剤量変化
+					"Gel_concd_entangled"	// 設定した多重度で、溶剤量変化、絡み合いが入るように初期化
+					},
+					Entangled:{N_Segments: int, N_Subchain: int, N_UnitCells: int},
+					NPT:{N_Segments: int, N_Subchain: int, N_UnitCells: int, ExpansionRatio: float, StepPress[]: float},
+					Multi:{N_Segments: int, N_Subchain: int, N_UnitCells: int, Multiplicities: int, ExpansionRatio: float, StepPress[]: float},
+					Multi_entangled:{N_Segments: int, N_Subchain: int, N_UnitCells: int, Multiplicities: int},
+					Gel:{N_Segments: int, N_Subchain: int, N_UnitCells: int, Multiplicities: int, ExpansionRatio: float, StepPress[]: float},
+					Gel_entangled:{N_Segments: int, N_Subchain: int, N_UnitCells: int, Multiplicities: int},
+					Gel_concd:{N_Segments: int, N_Subchain: int, N_UnitCells: int, Multiplicities: int, NV: float, ExpansionRatio: float, StepPress[]: float},
+					Gel_concd_entangled:{N_Segments: int, N_Subchain: int, N_UnitCells: int, Multiplicities: int,NV: float}
+				}
+			target_density:float
+			}
+	\end{def}
+
+	\\begin{data}
+		CalcCond:{"cognac112", 1}
+
+		SimulationCond:{
+			{"Regular_NW", {"4_Chain"}, {"4_Chain", "Calc", {1000, 100, 1000, 1000}, {""}}}
+			{"NPT",
+				{20, 0, 3},
+				{20, 0, 3, 2.0, [0.2, 0.5, 1.0, 2.0, 3.0, 4.5]},
+				{20, 0, 3, 1, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
+				{20, 0, 3, 1},
+				{20, 0, 3, 1, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
+				{20, 0, 3, 2},
+				{20, 0, 3, 2, 0.5, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
+				{20, 0, 3, 2, 0.5}
+			}
+		0.85
+		}
+	\end{data}
+	'''
+	###
+	with codecs.open('./calc_condition.udf', 'w', 'utf_8') as f:
+		f.write(contents)
+	return
+
 
 ###########################################
 # 
@@ -201,162 +274,7 @@ def readconditionudf():
 
 #################################
 #
-def makenewudf():
-	contents = '''
-	\\begin{def}
-		CalcCond:{
-			Cognac_ver:select{
-				"cognac101", 
-				"cognac112"
-				}, // Cognac version
-			Cores: int // 計算に使用するコア数を指定
-			}
 
-		SimulationCond:{
-			Model:{
-				TargetModel:select{ 
-						"Regular_NW",
-						"Random_NW"
-					},
-					Regular_NW:{
-						chains:select{
-							"3_Chain_S", 
-							"3_Chain_D", 
-							"4_Chain", 
-							"6_Chain", 
-							"8_Chain"
-						}
-					},
-					Random_NW:{
-						chains:select{
-						"3_Chain", 
-						"4_Chain", 
-						"5_Chain", 
-						"6_Chain", 
-						"7_Chain", 
-						"8_Chain"
-						},
-						Calc_Topolpgy:select{
-						"Calc",
-						"Read"
-						},
-						Calc:{
-							pre_sampling:int,
-							pre_try:int,
-							sampling:int,
-							try:int
-							},
-						Read:{
-							file_name:string
-						}
-					}
-				}
-			Type:{
-				SimType:select{
-					"Entangled",   // 密度、末端間距離を設定値に合わせるように多重度を変化。 絡み合いが入るように初期化
-					"NPT",		    // 密度、末端間距離を設定値に合わせるように多重度を変化。 絡み合いが入らないようにNPTで縮める
-					"Multi",    	// 設定した多重度で、密度を設定値になるように、システムサイズを縮める
-					"Multi_entangled",	// 設定した多重度で、密度を設定値になるように、システムサイズを縮め、絡み合いが入るように初期化
-					"Gel",    	// 設定した多重度で、密度、末端間距離を設定値に合わせるように溶剤を添加
-					"Gel_entangled",	// 設定した多重度で、密度、末端間距離を設定値に合わせるように溶剤を添加、絡み合いが入るように初期化
-					"Gel_concd",	// 設定した多重度で、溶剤量変化
-					"Gel_concd_entangled"	// 設定した多重度で、溶剤量変化、絡み合いが入るように初期化
-					},
-					Entangled:{
-						N_Segments: int,
-						N_Subchain: int,
-						N_UnitCells: int,
-					},
-					NPT:{
-						N_Segments: int,
-						N_Subchain: int,
-						N_UnitCells: int,
-						ExpansionRatio: float,
-						StepPress[]: float
-					},
-					Multi:{
-						N_Segments: int,
-						N_Subchain: int,
-						N_UnitCells: int,
-						Multiplicities: int,
-						ExpansionRatio: float,
-						StepPress[]: float
-					},
-					Multi_entangled:{
-						N_Segments: int,
-						N_Subchain: int,
-						N_UnitCells: int,
-						Multiplicities: int
-					},
-					Gel:{
-						N_Segments: int,
-						N_Subchain: int,
-						N_UnitCells: int,
-						Multiplicities: int,
-						ExpansionRatio: float,
-						StepPress[]: float
-					},
-					Gel_entangled:{
-						N_Segments: int,
-						N_Subchain: int,
-						N_UnitCells: int,
-						Multiplicities: int
-					},
-					Gel_concd:{
-						N_Segments: int,
-						N_Subchain: int,
-						N_UnitCells: int,
-						Multiplicities: int
-						NV: float,
-						ExpansionRatio: float,
-						StepPress[]: float
-					},
-					Gel_concd_entangled:{
-						N_Segments: int,
-						N_Subchain: int,
-						N_UnitCells: int,
-						Multiplicities: int,
-						NV: float
-					}
-				}
-			target_density:float
-			}
-	\end{def}
-
-	\\begin{data}
-		CalcCond:{
-			"cognac112",
-			1
-			}
-
-		SimulationCond:{
-			{"Regular_NW",
-				{"4_Chain"},
-				{"4_Chain",
-					"Calc",
-						{1000, 100, 1000, 1000},
-						{""}
-				}
-			}
-			{"NPT",
-				{20, 0, 3},
-				{20, 0, 3, 2.0, [0.2, 0.5, 1.0, 2.0, 3.0, 4.5]},
-				{20, 0, 3, 1, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
-				{20, 0, 3, 1},
-				{20, 0, 3, 1, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
-				{20, 0, 3, 2},
-				{20, 0, 3, 2, 0.5, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
-				{20, 0, 3, 2, 0.5}
-			}
-		0.85
-		}
-	\end{data}
-	'''
-	###
-	with codecs.open('./calc_condition.udf', 'w', 'utf_8') as f:
-		f.write(contents)
-	
-	return
 
 
 ######################################
@@ -854,19 +772,19 @@ class InitialSetup:
 			s_id = e_id
 			sub_id += 1
 			
-			# if self.n_sc != 0:
-			# 	sc_s_id = s_id
-			# 	for i in range(self.n_sc):
-			# 		tmp_xyz[sub_id] = tuple(np.array(pos)  +  (i + 1)*mod_o_vec*unit_len)
-			# 		tmp_atom_st.append([sub_id, 2, 1])
-			# 		sc_e_id = sub_id
-			# 		#
-			# 		bond = 2
-			# 		tmp_bond[bond_id] = tuple([bond, [sc_s_id, sc_e_id]])
-			# 		sc_s_id = sc_e_id
-			# 		seq_atom_id += 1
-			# 		bond_id += 1
-			#
+			if self.n_sc != 0:
+				sc_s_id = s_id
+				for i in range(self.n_sc):
+					tmp_xyz[sub_id] = tuple(np.array(pos)  +  (i + 1)*mod_o_vec*unit_len)
+					tmp_atom_st.append([sub_id, 2, 1])
+					sc_e_id = sub_id
+					#
+					bond = 2
+					tmp_bond[bond_id] = tuple([bond, [sc_s_id, sc_e_id]])
+					sc_s_id = sc_e_id
+					seq_atom_id += 1
+					bond_id += 1
+			
 		e_id = E_id
 		bond = 0
 		tmp_bond[bond_id] = tuple([bond, [s_id, e_id]])
