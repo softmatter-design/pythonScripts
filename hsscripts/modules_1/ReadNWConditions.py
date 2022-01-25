@@ -84,6 +84,7 @@ def readconditionudf():
 	#################################
 	if sim_type == "Entangled":
 		n_segments = u.get('SimulationCond.Type.Entangled.N_Segments')
+		n_sc = u.get('SimulationCond.Type.Entangled.N_Subchain')
 		n_cell = u.get('SimulationCond.Type.Entangled.N_UnitCells')
 		multi_init = 0
 		nv = 1.0
@@ -91,6 +92,7 @@ def readconditionudf():
 		step_press = []
 	elif sim_type == "NPT":
 		n_segments = u.get('SimulationCond.Type.NPT.N_Segments')
+		n_sc = u.get('SimulationCond.Type.NPT.N_Subchain')
 		n_cell = u.get('SimulationCond.Type.NPT.N_UnitCells')
 		multi_init = 0
 		nv = 1.0
@@ -98,6 +100,7 @@ def readconditionudf():
 		step_press = u.get('SimulationCond.Type.NPT.StepPress[]')
 	elif sim_type == "Multi":
 		n_segments = u.get('SimulationCond.Type.Multi.N_Segments')
+		n_sc = u.get('SimulationCond.Type.Multi.N_Subchain')
 		n_cell = u.get('SimulationCond.Type.Multi.N_UnitCells')
 		multi_init = u.get('SimulationCond.Type.Multi.Multiplicities')
 		nv = 1.0
@@ -105,6 +108,7 @@ def readconditionudf():
 		step_press = u.get('SimulationCond.Type.Multi.StepPress[]')
 	elif sim_type == "Multi_entangled":
 		n_segments = u.get('SimulationCond.Type.Multi_entangled.N_Segments')
+		n_sc = u.get('SimulationCond.Type.Multi_entangled.N_Subchain')
 		n_cell = u.get('SimulationCond.Type.Multi_entangled.N_UnitCells')
 		multi_init = u.get('SimulationCond.Type.Multi_entangled.Multiplicities')
 		nv = 1.0
@@ -112,6 +116,7 @@ def readconditionudf():
 		step_press = []
 	elif sim_type == "Gel":
 		n_segments = u.get('SimulationCond.Type.Gel.N_Segments')
+		n_sc = u.get('SimulationCond.Type.Gel.N_Subchain')
 		n_cell = u.get('SimulationCond.Type.Gel.N_UnitCells')
 		multi_init = u.get('SimulationCond.Type.Gel.Multiplicities')
 		expand = u.get('SimulationCond.Type.Gel.ExpansionRatio')
@@ -119,6 +124,7 @@ def readconditionudf():
 		nv = 1.0
 	elif sim_type == "Gel_entangled":
 		n_segments = u.get('SimulationCond.Type.Gel_entangled.N_Segments')
+		n_sc = u.get('SimulationCond.Type.Gel_entangled.N_Subchain')
 		n_cell = u.get('SimulationCond.Type.Gel_entangled.N_UnitCells')
 		multi_init = u.get('SimulationCond.Type.Gel_entangled.Multiplicities')
 		nv = 1.0
@@ -126,6 +132,7 @@ def readconditionudf():
 		step_press = []
 	elif sim_type == "Gel_concd":
 		n_segments = u.get('SimulationCond.Type.Gel_concd.N_Segments')
+		n_sc = u.get('SimulationCond.Type.Gel_concd.N_Subchain')
 		n_cell = u.get('SimulationCond.Type.Gel_concd.N_UnitCells')
 		multi_init = u.get('SimulationCond.Type.Gel_concd.Multiplicities')
 		nv = u.get('SimulationCond.Type.Gel_concd.NV')
@@ -133,6 +140,7 @@ def readconditionudf():
 		step_press = u.get('SimulationCond.Type.Gel_concd.StepPress[]')
 	elif sim_type == "Gel_concd_entangled":
 		n_segments = u.get('SimulationCond.Type.Gel_concd_entangled.N_Segments')
+		n_sc = u.get('SimulationCond.Type.Gel_concd_entangled.N_Subchain')
 		n_cell = u.get('SimulationCond.Type.Gel_concd_entangled.N_UnitCells')
 		multi_init = u.get('SimulationCond.Type.Gel_concd_entangled.Multiplicities')
 		nv = u.get('SimulationCond.Type.Gel_concd_entangled.NV')
@@ -256,16 +264,19 @@ def makenewudf():
 					},
 					Entangled:{
 						N_Segments: int,
+						N_Subchain: int,
 						N_UnitCells: int,
 					},
 					NPT:{
 						N_Segments: int,
+						N_Subchain: int,
 						N_UnitCells: int,
 						ExpansionRatio: float,
 						StepPress[]: float
 					},
 					Multi:{
 						N_Segments: int,
+						N_Subchain: int,
 						N_UnitCells: int,
 						Multiplicities: int,
 						ExpansionRatio: float,
@@ -273,11 +284,13 @@ def makenewudf():
 					},
 					Multi_entangled:{
 						N_Segments: int,
+						N_Subchain: int,
 						N_UnitCells: int,
 						Multiplicities: int
 					},
 					Gel:{
 						N_Segments: int,
+						N_Subchain: int,
 						N_UnitCells: int,
 						Multiplicities: int,
 						ExpansionRatio: float,
@@ -285,11 +298,13 @@ def makenewudf():
 					},
 					Gel_entangled:{
 						N_Segments: int,
+						N_Subchain: int,
 						N_UnitCells: int,
 						Multiplicities: int
 					},
 					Gel_concd:{
 						N_Segments: int,
+						N_Subchain: int,
 						N_UnitCells: int,
 						Multiplicities: int
 						NV: float,
@@ -298,6 +313,7 @@ def makenewudf():
 					},
 					Gel_concd_entangled:{
 						N_Segments: int,
+						N_Subchain: int,
 						N_UnitCells: int,
 						Multiplicities: int,
 						NV: float
@@ -323,14 +339,14 @@ def makenewudf():
 				}
 			}
 			{"NPT",
-				{20, 3},
-				{20, 3, 2.0, [0.2, 0.5, 1.0, 2.0, 3.0, 4.5]},
-				{20, 3, 1, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
-				{20, 3, 1},
-				{20, 3, 1, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
-				{20, 3, 2},
-				{20, 3, 2, 0.5, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
-				{20, 3, 2, 0.5}
+				{20, 0, 3},
+				{20, 0, 3, 2.0, [0.2, 0.5, 1.0, 2.0, 3.0, 4.5]},
+				{20, 0, 3, 1, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
+				{20, 0, 3, 1},
+				{20, 0, 3, 1, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
+				{20, 0, 3, 2},
+				{20, 0, 3, 2, 0.5, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
+				{20, 0, 3, 2, 0.5}
 			}
 		0.85
 		}
@@ -552,7 +568,7 @@ class InitialSetup:
 
 
 	################################################################################
-	# ネットワーク設定の計算
+	# レギュラー・ネットワーク設定
 	################################################################################
 	def calc_all(self):
 		# 架橋点 JP を設定
