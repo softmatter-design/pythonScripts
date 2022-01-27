@@ -21,23 +21,23 @@ def main():
 	exit(1)
 ####################################################################################
 class InitialSetup:
-	def __init__(self, sim_cond, restart, args):
+	def __init__(self):
 		#
-		self.nw_model = sim_cond[0]
-		self.nw_type = sim_cond[1]
-		self.n_segments = sim_cond[2]
-		self.n_cell = sim_cond[3]
-		self.multi_init = sim_cond[4]
-		self.target_density = sim_cond[5]
-		self.n_strand = sim_cond[6]
-		self.l_bond = sim_cond[7]
-		self.c_n = sim_cond[8]
-		self.expand = sim_cond[9]
-		#
-		self.n_sc = 0
-		#
-		self.restart = restart
-		self.input = args
+		# self.nw_model = sim_cond[0]
+		# self.nw_type = sim_cond[1]
+		# self.n_segments = sim_cond[2]
+		self.n_cell = 3
+		# self.multi_init = sim_cond[4]
+		# self.target_density = sim_cond[5]
+		# self.n_strand = sim_cond[6]
+		# self.l_bond = sim_cond[7]
+		# self.c_n = sim_cond[8]
+		# self.expand = sim_cond[9]
+		# #
+		# self.n_sc = 0
+		# #
+		# self.restart = restart
+		# self.input = args
 		# ユニットセルでの、jp およびサブチェインの始点と終点のXYZを設定
 		self.jp_xyz = [
 				[0.,0.,0.], 
