@@ -9,14 +9,16 @@ from UDFManager import UDFManager
 #######################################################
 #
 def setupcondition():
+	# 
 	findudf()
 
 	dic={'y':True,'yes':True,'q':False,'quit':False}
 	while True:
-		basic_cond, sim_cond, names = readconditionudf()
-
-		init = InitialSetup(sim_cond)
-		target_cond, condition_text = init.init_calc()
+		# read udf
+		basic_cond, nw_cond, sim_cond = readconditionudf()
+		# select
+		condsetup = CondSetup(nw_cond, sim_cond)
+		target_cond, condition_text = condsetup.init_calc()
 		print('Change UDF: type [r]eload')
 		print('Quit input process: type [q]uit')
 		inp = input('Condition is OK ==> [y]es >> ').lower()
@@ -24,16 +26,17 @@ def setupcondition():
 			inp = dic[inp]
 			break
 		print('##### \nRead Condition UDF again \n#####\n\n')
-	if inp :
+	if inp:
 		print("\n\nSetting UP progress !!")
 	else:
 		sys.exit("##### \nQuit !!")
 	
-	target_name = init.set_target_name()
-	# ネットワークの計算
-	calcd_data_dic = init.calc_all()
 
-	return basic_cond, sim_cond, names, target_cond, target_name, calcd_data_dic, condition_text
+	# ネットワークの計算
+	nwsetup = NWSetup(nw_cond, target_cond)
+	calcd_data_dic = nwsetup.calc_all()
+
+	return basic_cond, nw_cond, sim_cond, target_cond, calcd_data_dic, condition_text
 
 ###########################################
 # 
@@ -112,7 +115,6 @@ def makenewudf():
 	with codecs.open('./calc_condition.udf', 'w', 'utf_8') as f:
 		f.write(contents)
 	return
-
 
 ###########################################
 # 
@@ -224,16 +226,8 @@ def readconditionudf():
 	# 設定密度
 	target_density = u.get('SimulationCond.target_density')
 	########################################################
-	if strand == "3_Chain_S" or strand == "3_Chain_D":
-		n_strand = 3
-	elif strand == "4_Chain":
-		n_strand = 4
-	elif strand == "6_Chain":
-		n_strand = 6
-	elif strand == "8_Chain":
-		n_strand = 8
-	#
 	l_bond = 0.97
+	#
 	if n_segments <= 10:
 		c_n = 1.5
 	elif n_segments <= 20:
@@ -243,34 +237,10 @@ def readconditionudf():
 	else:
 		c_n = 1.75
 	#
-	sim_cond = [nw_model, strand, sim_type, n_segments, n_cell, multi_init, target_density, expand, n_strand, l_bond, c_n, step_press, nv]
+	nw_cond = [nw_model, strand, n_segments, n_cell, n_sc]
+	sim_cond = [sim_type, multi_init, target_density, expand, l_bond, c_n, step_press, nv]
 
-	####################################################
-	# Cognac用の名称設定
-	nw_name = "Network"
-	atom_name = ["JP_A", "End_A", "Strand_A", "Side_A", "Solvent"]
-	bond_name = ["bond_JP-Chn", "bond_Strand", "bond_Side"]
-	angle_name = ["angle_AAA"]
-	site_name = ["site_JP", "site_End", "site_Strand", "site_Solvent"]
-	pair_name = ["site_JP-site_JP", "site_Strand-site_JP", "site_Strand-site_Strand", 
-					"site_JP-site_End", "site_Strand-site_End", "site_End-site_End",
-					"site_Solvent-site_Solvent", "site_Solvent-site_JP", "site_Solvent-site_End",
-					"site_Solvent-site_Strand"]
-	site_pair_name = [ 
-					["site_JP", "site_JP"], 
-					["site_Strand", "site_JP"], 
-					["site_Strand", "site_Strand"],
-					["site_JP", "site_End"], 
-					["site_Strand", "site_End"], 
-					["site_End", "site_End"],
-					["site_Solvent", "site_Solvent"],
-					["site_Solvent", "site_JP"],
-					["site_Solvent", "site_End"],
-					["site_Solvent", "site_Strand"],
-					]
-	names = [nw_name, atom_name, bond_name, angle_name, site_name, pair_name, site_pair_name]
-
-	return basic_cond, sim_cond, names
+	return basic_cond, nw_cond, sim_cond
 
 #################################
 #
@@ -278,24 +248,35 @@ def readconditionudf():
 
 
 ######################################
-##### ネットワークの初期設定を行う #####
+##### Setup Calculation COnditions
 ######################################
-class InitialSetup:
-	def __init__(self, sim_cond):
+class CondSetup:
+	def __init__(self, nw_cond, sim_cond):
+		self.nw_model = nw_cond[0]
+		self.strand = nw_cond[1]
+		self.n_segments = nw_cond[2]
+		self.n_cell = nw_cond[3]
+		self.n_sc = nw_cond[4]
 		#
-		self.nw_model = sim_cond[0]
-		self.strand = sim_cond[1]
-		self.nw_type = sim_cond[2]
-		self.n_segments = sim_cond[3]
-		self.n_cell = sim_cond[4]
-		self.multi_init = sim_cond[5]
-		self.target_density = sim_cond[6]
-		self.expand = sim_cond[7]
-		self.n_strand = sim_cond[8]
-		self.l_bond = sim_cond[9]
-		self.c_n = sim_cond[10]
-		self.step_press = sim_cond[11]
-		self.nv = sim_cond[12]
+		self.sim_type = sim_cond[0]
+		self.multi_init = sim_cond[1]
+		self.target_density = sim_cond[2]
+		self.expand = sim_cond[3]
+		self.l_bond = sim_cond[4]
+		self.c_n = sim_cond[5]
+		self.step_press = sim_cond[6]
+		self.nv = sim_cond[7]
+		#
+		if self.strand == "3_Chain_S" or self.strand == "3_Chain_D":
+			self.n_strand = 3
+		elif self.strand == "4_Chain":
+			self.n_strand = 4
+		elif self.strand == "5_Chain":
+			self.n_strand = 5
+		elif self.strand == "6_Chain":
+			self.n_strand = 6
+		elif self.strand == "7_Chain":
+			self.n_strand = 7
 	##########################################
 	##### ネットワークポリマーの諸量を計算 ######
 	##########################################
@@ -303,8 +284,7 @@ class InitialSetup:
 	def calc_conditions(self):
 		## 計算システムの諸量を計算して、出力
 		target_cond, condition_text = self.init_calc()
-		target_name = self.set_target_name()	
-		return target_cond, target_name, condition_text
+		return target_cond, condition_text
 
 	################################################################################
 	def init_calc(self):
@@ -313,28 +293,28 @@ class InitialSetup:
 		#
 		if self.strand == "3_Chain_S":
 			n_chains = 12						        # サブチェインの本数
-			n_beads_unit = 8 + self.n_segments*n_chains		# ユニットセル当たりの粒子数
+			n_beads_unit = 8 + self.n_segments*(1 + self.n_sc)*n_chains		# ユニットセル当たりの粒子数
 			a_cell = (2*2**0.5)*e2e				        # 理想鎖状態でのユニットセル長
 		elif self.strand == "3_Chain_D":
 			n_chains = 24						        # サブチェインの本数
-			n_beads_unit = 16 + self.n_segments*n_chains	# ユニットセル当たりの粒子数
+			n_beads_unit = 16 + self.n_segments*(1 + self.n_sc)*n_chains	# ユニットセル当たりの粒子数
 			a_cell = (2*2**0.5)*e2e				        # 理想鎖状態でのユニットセル長
 		elif self.strand == "4_Chain":
 			n_chains = 16						        # サブチェインの本数
-			n_beads_unit = 8 + self.n_segments*n_chains		# ユニットセル当たりの粒子数
+			n_beads_unit = 8 + self.n_segments*(1 + self.n_sc)*n_chains		# ユニットセル当たりの粒子数
 			a_cell = (4*3**0.5)*e2e/3			        # 理想鎖状態でのユニットセル長
 		elif self.strand == "6_Chain":
 			n_chains = 3						        # サブチェインの本数
-			n_beads_unit = 1 + self.n_segments*n_chains		# ユニットセル当たりの粒子数
+			n_beads_unit = 1 + self.n_segments*(1 + self.n_sc)*n_chains		# ユニットセル当たりの粒子数
 			a_cell = e2e						            # 理想鎖状態でのユニットセル長
 		elif self.strand == "8_Chain":
 			n_chains = 8						        # サブチェインの本数
-			n_beads_unit = 2 + self.n_segments*n_chains     # ユニットセル当たりの粒子数
+			n_beads_unit = 2 + self.n_segments*(1 + self.n_sc)*n_chains     # ユニットセル当たりの粒子数
 			a_cell = (2*3**0.5)*e2e/3					# 理想鎖状態でのユニットセル長
 		#
 		n_solvent = 0
 		#
-		if self.nw_type == "Entangled" or self.nw_type == "NPT":
+		if self.sim_type == "Entangled" or self.sim_type == "NPT":
 			unit_cell = a_cell
 			self.multi = round(self.target_density*a_cell**3/n_beads_unit)		# 密度を設定値とした場合に必要な多重度
 			fin_dens = n_beads_unit*self.multi/a_cell**3						# 上記の多重度での密度
@@ -343,7 +323,7 @@ class InitialSetup:
 			total_net_atom = int(self.multi*single_net_atom)    			# 全システム中のネットワーク粒子数
 			system = (total_net_atom/self.target_density)**(1/3)			# その際のシステムサイズ
 			nu = n_chains*self.multi/a_cell**3.								# ストランドの数密度
-		elif self.nw_type == "Multi" or self.nw_type == "Multi_entangled":
+		elif self.sim_type == "Multi" or self.sim_type == "Multi_entangled":
 			self.multi = self.multi_init
 			org_system = a_cell*self.n_cell							# e2e から決めたシステムサイズ
 			single_net_atom = int(n_beads_unit*self.n_cell**3.)	    # 一つのネットワーク中の粒子数
@@ -354,7 +334,7 @@ class InitialSetup:
 			mod_e2e = shrinkage*e2e								# 収縮後の末端間距離
 			unit_cell = shrinkage*a_cell
 			nu = n_chains*self.multi*self.n_cell**3./vol		# ストランドの数密度
-		elif self.nw_type == "Gel" or self.nw_type == "Gel_entangled":
+		elif self.sim_type == "Gel" or self.sim_type == "Gel_entangled":
 			unit_cell = a_cell
 			self.multi = self.multi_init
 			system = a_cell*self.n_cell						    # システムサイズ
@@ -367,7 +347,7 @@ class InitialSetup:
 			n_solvent = int(total_atom - total_net_atom)		# 溶媒の粒子数
 			nv = total_net_atom/total_atom						# ネットワークの体積分率
 			nu = n_chains*self.multi*self.n_cell**3./vol		# ストランドの数密度
-		elif self.nw_type == "Gel_concd" or self.nw_type == "Gel_concd_entangled":
+		elif self.sim_type == "Gel_concd" or self.sim_type == "Gel_concd_entangled":
 			unit_cell = a_cell
 			self.multi = self.multi_init
 			single_net_atom = int(n_beads_unit*self.n_cell**3.)	    # 一つのネットワーク中の粒子数
@@ -384,14 +364,14 @@ class InitialSetup:
 		#
 		text = "#########################################" + "\n"
 		text += "ネットワークモデル\t\t" + str(self.strand) + "\n"
-		text += "ネットワークタイプ\t\t" + str(self.nw_type) + "\n"
+		text += "ネットワークタイプ\t\t" + str(self.sim_type) + "\n"
 		text += "ストランド中のセグメント数\t" + str(self.n_segments) + "\n"
 		text += "特性比:\t\t\t" + str(round(self.c_n,2)) + "\n"
 		text += "末端間距離:\t\t\t" + str(round(e2e,5)) + "\n"
 		text += "一辺当たりの単位ユニット数\t" + str(self.n_cell) + "\n"
 		text += "#########################################" + "\n"
 
-		if self.nw_type == "Entangled" or self.nw_type == "NPT":
+		if self.sim_type == "Entangled" or self.sim_type == "NPT":
 			text += "設定密度:\t\t\t" + str(self.target_density) + "\n"
 			text += "多重度:\t\t\t\t" + str(self.multi) + "\n"
 			text += "セグメント数:\t\t\t" + str(total_net_atom) + "\n"
@@ -403,7 +383,7 @@ class InitialSetup:
 			print(text)
 			if abs(err_dens) > 1:
 				print(u"\n##### \n圧縮後の密度が、設定したい密度と 1% 以上違います。\nそれでも計算しますか？")
-		elif self.nw_type == "Multi":
+		elif self.sim_type == "Multi":
 			text += "当初のシステムサイズ:\t\t" + str(round(org_system, 4)) + "\n"
 			text += "多重度:\t\t\t\t" + str(self.multi) + "\n"
 			text += "設定密度:\t\t\t" + str(self.target_density) + "\n"
@@ -415,7 +395,7 @@ class InitialSetup:
 			text += "ストランドの数密度:\t\t" + str(round(nu, 5)) + "\n"
 			text += "#########################################" + "\n"
 			print(text)
-		elif self.nw_type == "Multi_entangled":
+		elif self.sim_type == "Multi_entangled":
 			text += "当初のシステムサイズ:\t\t" + str(round(org_system, 4)) + "\n"
 			text += "多重度:\t\t\t\t" + str(self.multi) + "\n"
 			text += "設定密度:\t\t\t" + str(self.target_density) + "\n"
@@ -426,7 +406,7 @@ class InitialSetup:
 			text += "ストランドの数密度:\t\t" + str(round(nu, 5)) + "\n"
 			text += "#########################################" + "\n"
 			print(text)
-		elif self.nw_type == "Gel":
+		elif self.sim_type == "Gel":
 			text += "設定密度:\t\t\t" + str(self.target_density) + "\n"
 			text += "多重度:\t\t\t\t" + str(self.multi) + "\n"
 			text += "単一ネットワークのセグメント数:\t" + str(single_net_atom) + "\n"
@@ -437,7 +417,7 @@ class InitialSetup:
 			text += "ストランドの数密度:\t\t" + str(round(nu, 5)) + "\n"
 			text += "#########################################" + "\n"
 			print(text)
-		elif self.nw_type == "Gel_entangled":
+		elif self.sim_type == "Gel_entangled":
 			text += "設定密度:\t\t\t" + str(self.target_density) + "\n"
 			text += "多重度:\t\t\t\t" + str(self.multi) + "\n"
 			text += "単一ネットワークのセグメント数:\t" + str(single_net_atom) + "\n"
@@ -447,7 +427,7 @@ class InitialSetup:
 			text += "ストランドの数密度:\t\t" + str(round(nu, 5)) + "\n"
 			text += "#########################################" + "\n"
 			print(text)
-		elif self.nw_type == "Gel_concd":
+		elif self.sim_type == "Gel_concd":
 			text += "設定密度:\t\t\t" + str(self.target_density) + "\n"
 			text += "多重度:\t\t\t\t" + str(self.multi) + "\n"
 			text += "単一ネットワークのセグメント数:\t" + str(single_net_atom) + "\n"
@@ -458,7 +438,7 @@ class InitialSetup:
 			text += "ストランドの数密度:\t\t" + str(round(nu, 5)) + "\n"
 			text += "#########################################" + "\n"
 			print(text)
-		elif self.nw_type == "Gel_concd_entangled":
+		elif self.sim_type == "Gel_concd_entangled":
 			text += "設定密度:\t\t\t" + str(self.target_density) + "\n"
 			text += "多重度:\t\t\t\t" + str(self.multi) + "\n"
 			text += "単一ネットワークのセグメント数:\t" + str(single_net_atom) + "\n"
@@ -475,15 +455,17 @@ class InitialSetup:
 		target_cond = [system, unit_cell, total_net_atom, nu, structure, self.multi, n_solvent]
 		return target_cond, text
 
-	###################
-	# target_nameを決める。
-	def set_target_name(self):
-		target_name = str(self.nw_type ) + "_" + str(self.strand) + '_N_' + str(self.n_segments) + "_Cells_" + str(self.n_cell) + "_Multi_" + str(self.multi)
-		return target_name
+######################################
+##### ネットワークの初期設定を行う #####
+######################################
+class NWSetup:
+	def __init__(self, nw_cond, target_cond):
+		self.strand = nw_cond[1]
+		self.n_segments = nw_cond[2]
+		self.n_cell = nw_cond[3]
+		self.n_sc = nw_cond[4]
 
-
-
-
+		self.multi = target_cond[5]
 
 	################################################################################
 	# レギュラー・ネットワーク設定
@@ -740,6 +722,10 @@ class InitialSetup:
 		start_xyz = np.array(se_xyz[0]) + bas_xyz
 		end_xyz = np.array(se_xyz[1]) + bas_xyz
 		vec = end_xyz - start_xyz
+		# ストランドの鎖長分のループ処理
+		unit_len = 1./(self.n_segments + 1)
+		ortho_vec = self.find_ortho_vec(vec)
+		mod_o_vec = np.linalg.norm(vec)*ortho_vec
 		# 始点のアトムのIDを設定
 		mod_xyz = list(start_xyz)[:]
 		for dim in range(3):
@@ -755,7 +741,9 @@ class InitialSetup:
 		E_id = jp_id_dic[tuple(mod_xyz)]
 		# サブチェインの鎖長分のループ処理
 		for seg in range(self.n_segments):
-			tmp_xyz[sub_id] = tuple(start_xyz + vec*(seg+1)/(self.n_segments+1.))
+			pos = tuple(start_xyz + vec*(seg + 1)/(self.n_segments + 1.))
+			tmp_xyz[sub_id] = pos
+
 			if seg == 0 or seg == self.n_segments - 1:
 				tmp_atom_sc.append([sub_id, 1, 1])
 			else:
@@ -776,13 +764,13 @@ class InitialSetup:
 				sc_s_id = s_id
 				for i in range(self.n_sc):
 					tmp_xyz[sub_id] = tuple(np.array(pos)  +  (i + 1)*mod_o_vec*unit_len)
-					tmp_atom_st.append([sub_id, 2, 1])
+					tmp_atom_sc.append([sub_id, 2, 1])
 					sc_e_id = sub_id
 					#
 					bond = 2
 					tmp_bond[bond_id] = tuple([bond, [sc_s_id, sc_e_id]])
 					sc_s_id = sc_e_id
-					seq_atom_id += 1
+					sub_id += 1
 					bond_id += 1
 			
 		e_id = E_id

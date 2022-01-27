@@ -9,28 +9,46 @@ from UDFManager import UDFManager
 # UDF の作成
 ##########################################
 class SetUpUDF:
-	def __init__(self, basic_cond, sim_cond, target_name, target_dir, names):
+	def __init__(self, basic_cond, sim_cond, target_dir):
 		#
 		self.ver_cognac = basic_cond[0]
 		self.blank_udf = basic_cond[1]
 		self.base_udf = basic_cond[2]
 		self.core = ' -n ' + str(basic_cond[3])
 		# 
-		self.nw_type = sim_cond[2]
-		self.step_press = sim_cond[11]
+		self.sim_type = sim_cond[0]
+		self.multi_init = sim_cond[1]
+		self.target_density = sim_cond[2]
+		self.expand = sim_cond[3]
+		self.l_bond = sim_cond[4]
+		self.c_n = sim_cond[5]
+		self.step_press = sim_cond[6]
+		self.nv = sim_cond[7]
 		#
-		self.target_name = target_name
-		self.f_eval_py = 'evaluate_all.py'
-		# ファイルのディレクトリ
 		self.target_dir = target_dir
+		self.f_eval_py = 'evaluate_all.py'
 		# Cognac用の名称設定
-		self.nw_name = names[0]
-		self.atom_name = names[1]
-		self.bond_name = names[2]
-		self.angle_name = names[3]
-		self.site_name = names[4]
-		self.pair_name = names[5]
-		self.site_pair_name = names[6]
+		self.nw_name = "Network"
+		self.atom_name = ["JP_A", "End_A", "Strand_A", "Side_A", "Solvent"]
+		self.bond_name = ["bond_JP-Chn", "bond_Strand", "bond_Side"]
+		self.angle_name = ["angle_AAA"]
+		self.site_name = ["site_JP", "site_End", "site_Strand", "site_Solvent"]
+		self.pair_name = ["site_JP-site_JP", "site_Strand-site_JP", "site_Strand-site_Strand", 
+						"site_JP-site_End", "site_Strand-site_End", "site_End-site_End",
+						"site_Solvent-site_Solvent", "site_Solvent-site_JP", "site_Solvent-site_End",
+						"site_Solvent-site_Strand"]
+		self.site_pair_name = [ 
+						["site_JP", "site_JP"], 
+						["site_Strand", "site_JP"], 
+						["site_Strand", "site_Strand"],
+						["site_JP", "site_End"], 
+						["site_Strand", "site_End"], 
+						["site_End", "site_End"],
+						["site_Solvent", "site_Solvent"],
+						["site_Solvent", "site_JP"],
+						["site_Solvent", "site_End"],
+						["site_Solvent", "site_Strand"],
+						]
 
 	####################################
 	# UDFファイルを設定し、バッチ処理を作成
@@ -41,21 +59,21 @@ class SetUpUDF:
 			batch = "#!/bin/bash\n"
 
 		###############
-		# nw_typeに応じて計算条件を選択
-		if self.nw_type == "homo_KG":
+		# sim_typeに応じて計算条件を選択
+		if self.sim_type == "homo_KG":
 			print("making homo KG")
 			batch = self.homo_kg(batch)
 			# 評価用のパイソンスクリプトを作成
 			self.evaluate_setup("chain")
-		elif self.nw_type == "Entangled" or self.nw_type == "Multi_entangled" or self.nw_type == "Gel_entangled" or self.nw_type == "Gel_concd_entangled":
+		elif self.sim_type == "Entangled" or self.sim_type == "Multi_entangled" or self.sim_type == "Gel_entangled" or self.sim_type == "Gel_concd_entangled":
 			batch = self.kg_calc(batch)
 			# 評価用のパイソンスクリプトを作成
 			self.evaluate_setup("strand")
-		elif self.nw_type == "NPT" or self.nw_type == "Multi" or self.nw_type == "Gel" or self.nw_type == "Gel_concd":
+		elif self.sim_type == "NPT" or self.sim_type == "Multi" or self.sim_type == "Gel" or self.sim_type == "Gel_concd":
 			batch = self.npt_calc(batch)
 			# 評価用のパイソンスクリプトを作成
 			self.evaluate_setup("strand")
-		# elif self.nw_type == "Gel" or self.nw_type == "Gel_concd":
+		# elif self.sim_type == "Gel" or self.sim_type == "Gel_concd":
 		# 	batch = self.npt_gel(batch)
 		# 	# 評価用のパイソンスクリプトを作成
 		# 	self.evaluate_setup("strand")
@@ -101,7 +119,7 @@ class SetUpUDF:
 
 	# ファイル名の処理
 	def make_step(self, time, fn_ext, batch, f_eval):
-		present_udf = fn_ext[0] + self.target_name + fn_ext[1]
+		present_udf = fn_ext[0] + self.target_dir + fn_ext[1]
 		out_udf = present_udf.replace("uin", "out")
 		batch += self.ver_cognac + ' -I ' + present_udf + ' -O ' + out_udf + self.core + ' \n'
 		if f_eval:

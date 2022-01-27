@@ -8,20 +8,30 @@ from UDFManager import UDFManager
 # Initial_UDF の作成
 ##########################################
 class MakeInitUDF:
-	def __init__(self, basic_cond, sim_cond, target_cond, names, target_name, calcd_data_dic, condition_text):
+	def __init__(self, basic_cond, nw_cond, sim_cond, target_cond, calcd_data_dic, condition_text):
 		#
-		self.nw_model = sim_cond[0]
-		self.strand = sim_cond[1]
-		self.nw_type = sim_cond[2]
-		self.n_segments = sim_cond[3]
-		self.n_cell = sim_cond[4]
-		self.multi_init = sim_cond[5]
-		self.target_density = sim_cond[6]
-		self.expand = sim_cond[7]
-		self.n_strand = sim_cond[8]
-		self.l_bond = sim_cond[9]
-		self.c_n = sim_cond[10]
-		self.step_press = sim_cond[11]
+		self.ver_cognac = basic_cond[0]
+		self.blank_udf = basic_cond[1]
+		self.base_udf = basic_cond[2]
+		self.core = ' -n ' + str(basic_cond[3])
+		#
+		if nw_cond[0] == "Regular_NW":
+			self.nw_model = 'RegNW'
+		elif nw_cond[0] == "Random_NW":
+			self.nw_model = 'RandNW'
+		self.strand = nw_cond[1]
+		self.n_segments = nw_cond[2]
+		self.n_cell = nw_cond[3]
+		self.n_sc = nw_cond[4]
+		#
+		self.sim_type = sim_cond[0]
+		self.multi_init = sim_cond[1]
+		self.target_density = sim_cond[2]
+		self.expand = sim_cond[3]
+		self.l_bond = sim_cond[4]
+		self.c_n = sim_cond[5]
+		self.step_press = sim_cond[6]
+		self.nv = sim_cond[7]
 		#
 		self.system_size = target_cond[0]
 		self.unit_cell = target_cond[1]
@@ -31,23 +41,31 @@ class MakeInitUDF:
 		self.multi = target_cond[5]
 		self.n_solvent = target_cond[6]
 		#
-		self.ver_cognac = basic_cond[0]
-		self.blank_udf = basic_cond[1]
-		self.base_udf = basic_cond[2]
-		self.core = ' -n ' + str(basic_cond[3])
-		# Cognac用の名称設定
-		self.nw_name = names[0]
-		self.atom_name = names[1]
-		self.bond_name = names[2]
-		self.angle_name = names[3]
-		self.site_name = names[4]
-		self.pair_name = names[5]
-		self.site_pair_name = names[6]
-		#
-		self.target_name = target_name
 		self.calcd_data_dic = calcd_data_dic
 		self.cond_txt = condition_text
 		# 条件設定
+		# Cognac用の名称設定
+		self.nw_name = "Network"
+		self.atom_name = ["JP_A", "End_A", "Strand_A", "Side_A", "Solvent"]
+		self.bond_name = ["bond_JP-Chn", "bond_Strand", "bond_Side"]
+		self.angle_name = ["angle_AAA"]
+		self.site_name = ["site_JP", "site_End", "site_Strand", "site_Solvent"]
+		self.pair_name = ["site_JP-site_JP", "site_Strand-site_JP", "site_Strand-site_Strand", 
+						"site_JP-site_End", "site_Strand-site_End", "site_End-site_End",
+						"site_Solvent-site_Solvent", "site_Solvent-site_JP", "site_Solvent-site_End",
+						"site_Solvent-site_Strand"]
+		self.site_pair_name = [ 
+						["site_JP", "site_JP"], 
+						["site_Strand", "site_JP"], 
+						["site_Strand", "site_Strand"],
+						["site_JP", "site_End"], 
+						["site_Strand", "site_End"], 
+						["site_End", "site_End"],
+						["site_Solvent", "site_Solvent"],
+						["site_Solvent", "site_JP"],
+						["site_Solvent", "site_End"],
+						["site_Solvent", "site_Strand"],
+						]
 		# [R0, K]
 		self.harmonic = [0.97, 1000]
 		# [Potential_Type, theta0, K]		
@@ -58,35 +76,35 @@ class MakeInitUDF:
 	# UDFファイルを設定し、バッチ処理を作成
 	def setup_baseudf(self):
 		# 計算用のディレクトリーを作成
-		self.make_dir()
+		target_dir = self.make_dir()
 		# base_udfを作成
-		self.make_base_udf()
+		self.make_base_udf(target_dir)
 
-		return self.target_dir
+		return target_dir
 	################################################################################
 	# 計算用のディレクトリーを作成
 	def make_dir(self):
-		self.target_dir = str(self.target_name)
-		os.makedirs(self.target_dir, exist_ok = True)
-		with open(os.path.join(self.target_dir, "calc.dat"), "w") as f:
-			f.write("# segments\tbond_length\tCN\tfunc\tnu\tNW_type\n" + str(self.n_segments) + '\t' + str(self.l_bond) + '\t' + str(self.c_n) + '\t' + str(self.n_strand) + "\t" + str(round(self.nu, 5)) + '\t' + self.structure)
-		with open(os.path.join(self.target_dir, "calc_cond.txt"), "w") as f:
+		target_dir = self.nw_model + "_" + self.sim_type + "_" + self.strand + '_N_' + str(self.n_segments) + "_Cells_" + str(self.n_cell) + "_Multi_" + str(self.multi)
+		os.makedirs(target_dir, exist_ok = True)
+		with open(os.path.join(target_dir, "calc.dat"), "w") as f:
+			f.write("# segments\tbond_length\tCN\tfunc\tnu\tNW_type\n" + str(self.n_segments) + '\t' + str(self.l_bond) + '\t' + str(self.c_n) + "\t" + str(round(self.nu, 5)) + '\t' + self.structure)
+		with open(os.path.join(target_dir, "calc_cond.txt"), "w") as f:
 			f.write(self.cond_txt)
-		return
+		return target_dir
 
 	############################################
 	# base_udfを作成
-	def make_base_udf(self):
+	def make_base_udf(self, target_dir):
 		# 初期udfの内容を作成する
-		self.make_base()
+		self.make_base(target_dir)
 		# すべてのアトムの位置座標及びボンド情報を設定
-		self.setup_atoms()
+		self.setup_atoms(target_dir)
 		return
 
 	################################################################################
-	def make_base(self):
+	def make_base(self, target_dir):
 		#--- create an empty UDF file ---
-		target_udf = os.path.join(self.target_dir, self.base_udf)
+		target_udf = os.path.join(target_dir, self.base_udf)
 		with open(target_udf, 'w') as f:
 			f.write(r'\include{"%s"}' % self.blank_udf)
 
@@ -98,7 +116,7 @@ class MakeInitUDF:
 		# Solver
 		p = 'Simulation_Conditions.Solver.'
 		u.put('Dynamics', p + 'Solver_Type')
-		if self.nw_type == "NPT" or self.nw_type == 'Multi' or self.nw_type == "Gel" or self.nw_type == "Gel_concd":
+		if self.sim_type == "NPT" or self.sim_type == 'Multi' or self.sim_type == "Gel" or self.sim_type == "Gel_concd":
 			u.put('NPT_Andersen_Kremer_Grest', 	p + 'Dynamics.Dynamics_Algorithm')
 			u.put(self.total_atom, 				p + 'Dynamics.NPT_Andersen_Kremer_Grest.Cell_Mass')
 			u.put(0.5, 							p + 'Dynamics.NPT_Andersen_Kremer_Grest.Friction')
@@ -145,7 +163,7 @@ class MakeInitUDF:
 		#--- Initial_Structure ---
 		# Initial_Unit_Cell
 		p = 'Initial_Structure.Initial_Unit_Cell.'
-		if self.nw_type == "NPT" or self.nw_type == 'Multi' or self.nw_type == "Gel" or self.nw_type == "Gel_concd":
+		if self.sim_type == "NPT" or self.sim_type == 'Multi' or self.sim_type == "Gel" or self.sim_type == "Gel_concd":
 			p = 'Initial_Structure.Initial_Unit_Cell.'
 			u.put(0, p + 'Density')
 			u.put([self.system_size*self.expand, self.system_size*self.expand, self.system_size*self.expand, 90.0, 90.0, 90.0], p + 'Cell_Size')
@@ -199,11 +217,11 @@ class MakeInitUDF:
 
 	################################################################################
 	# すべてのアトムの位置座標及びボンド情報を設定
-	def setup_atoms(self):
+	def setup_atoms(self, target_dir):
 		# 多重配置の場合の位置シフト量
 		shift = 2
 		#
-		target_udf = os.path.join(self.target_dir, self.base_udf)
+		target_udf = os.path.join(target_dir, self.base_udf)
 		u = UDFManager(target_udf)
 		u.jump(-1)
 
@@ -273,7 +291,7 @@ class MakeInitUDF:
 			shift_vec = self.expand*count*shift*np.array(np.random.rand(3))
 			pos_all = self.calcd_data_dic[mul]["pos_all"]
 			for i in range(len(pos_all)):
-				if self.nw_type == "NPT" or self.nw_type == 'Multi' or self.nw_type == "Gel"  or self.nw_type == "Gel_concd":
+				if self.sim_type == "NPT" or self.sim_type == 'Multi' or self.sim_type == "Gel"  or self.sim_type == "Gel_concd":
 					mod_pos = self.expand*self.unit_cell*np.array(list(pos_all[i])) + self.expand*shift_vec
 				else:
 					mod_pos = self.unit_cell*np.array(list(pos_all[i])) + shift_vec
