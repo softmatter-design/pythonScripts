@@ -43,11 +43,11 @@ expand = 3
 restart = 0
 ############################################################
 # プレ探索の条件：繰り返しサンプリング数、最小構造探索の繰り返し数
-pre_sampling = 1000
+pre_sampling = 100
 pre_try = 100
 # 本探索条件
-n_sampling = 1000
-n_try = 1000
+n_sampling = 100
+n_try = 100
 
 ###############
 cond_top = [pre_try, pre_sampling, n_try, n_sampling]
@@ -116,16 +116,52 @@ def main():
 	######################################
 	# 初期状態を設定し、基本となるデータを取得
 	args = sys.argv
-	init = modules_1.RandomNW.InitialSetup(sim_cond, restart, args)
-	read_file_path, target_name, target_cond, base_top_list = init.get_base_data()
+	init = modules_1.RandomNW_mod.InitialSetup(sim_cond, restart, args)
+	read_file_path, target_name, target_cond = init.get_base_data()
 	###################################################################################################
-	# トポロジーの異なるネットワークを探索して、任意の多重度のネットワークポリマーの代数的連結性の分布関数を策定
-	mod = modules_1.RandomNW.ModifyTop(base_top_list, sim_cond, cond_top, target_cond, hist_bins, read_file_path)
-	top_dic_list = mod.find_top(restart)
+	make8 = modules_1.RandomNW_mod_2.Make8(sim_cond)
+	base_top_list = make8.make8()
+
+
+
+
+
+
+
+
+
+	n_multi = 5
+
+	if restart == 0:
+		# トポロジーの異なるネットワークを探索して、任意の多重度のネットワークポリマーの代数的連結性の分布関数を策定
+		mod = modules_1.RandomNW_mod_2.ModifyTop(base_top_list, sim_cond, cond_top, target_cond, hist_bins, read_file_path)
+		candidate_list, target_dir = mod.top_search()
+	else:
+		sel = modules_1.RandomNW_mod_2.Select(read_file_path, hist_bins, n_multi)
+		candidate_list, target_dir = sel.top_select()
+
+	sel = modules_1.RandomNW_mod_2.Select(target_dir, hist_bins, n_multi)
+	top_dic_list = sel.nw_search(candidate_list, target_dir)
+	
 	###########################################
 	# ターゲットとなるネットワーク全体の辞書を設定。
-	setup = modules_1.RandomNW.SetUp(top_dic_list, base_top_list, n_segments, n_sc)
+	setup = modules_1.RandomNW_mod_2.SetUp(top_dic_list, base_top_list, n_segments, n_sc)
 	calcd_data_dic = setup.make_data_dic()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	##################
 	# baseUDF の作成

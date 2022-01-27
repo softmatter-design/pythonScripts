@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ################################################################
-from modules_1 import MakeRandomNW
+import modules_1
 ################################################################
 ################################################################
 # 基本ネットワーク関連の設定
@@ -12,11 +12,11 @@ n_cell = 3
 
 sim_cond = [n_cell, n_strand]
 # プレ探索の条件：繰り返しサンプリング数、最小構造探索の繰り返し数
-pre_sampling = 1000
-pre_try = 1000
+pre_sampling = 2
+pre_try = 2
 # 本探索条件
-n_sampling = 1000
-n_try = 100
+n_sampling = 2
+n_try = 2
 
 ###############
 cond_top = [pre_try, pre_sampling, n_try, n_sampling]
@@ -30,9 +30,12 @@ hist_bins = 50
 
 ###################################################################################################
 # トポロジーの異なるネットワークを探索して、任意の多重度のネットワークポリマーの代数的連結性の分布関数を策定
-mod = MakeRandomNW.ModifyTop(sim_cond, cond_top, hist_bins)
-base_top_list = mod.make_8chain_dic()
-top_dic_list = mod.top_search(base_top_list)
+
+init = modules_1.RandomNW_mod.InitialSetup()
+base_top_list = init.make_8chain_dic()
+
+mod = modules_1.RandomNW_mod.ModifyTop(base_top_list, cond_top, hist_bins)
+top_dic_list = mod.find_top()
 ###########################################
 # ターゲットとなるネットワーク全体の辞書を設定。
 # setup = RandomNW.SetUp(top_dic_list, base_top_list, n_segments)
