@@ -99,11 +99,15 @@ class InitialSetup:
 		text += "一辺当たりの単位ユニット数\t" + str(self.n_cell) + "\n"
 		text += "#########################################" + "\n"
 		#
+		print(self.nw_type)
+		print(text)
 		e2e = self.l_bond*((self.n_segments + 1)*self.c_n)**0.5				# 理想鎖状態での末端間距離
 		n_beads_unit = 2 + self.n_segments*(1 + self.n_sc)*self.n_strand	# ユニットセル当たりの粒子数
 		a_cell = (2*3**0.5)*e2e/3											# 理想鎖状態でのユニットセル長
 		init_dens = n_beads_unit/a_cell**3									# 理想鎖状態でのユニットセル長
 		
+		print(self.nw_type)
+
 		if self.nw_type == "KG_entangled":
 			multi_nw = round(self.target_density/init_dens)
 			density = multi_nw*n_beads_unit/a_cell**3					# 密度
@@ -148,7 +152,7 @@ class InitialSetup:
 			# 	self.prompt()
 			# else:
 			# 	self.prompt()
-		elif self.nw_type == "KG_NPT":
+		elif self.nw_type == "NPT":
 			multi_nw = round(self.target_density/init_dens)
 			density = multi_nw*n_beads_unit/a_cell**3					# 密度
 			err_dens = (density/self.target_density - 1)*100

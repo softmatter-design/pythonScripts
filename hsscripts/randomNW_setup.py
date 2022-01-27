@@ -1,29 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ################################################################
-try:
-	from network_setups import RandomNW
-	from network_setups import SetupInitUDF
-	from setups import EquivCalcSetup
-except ImportError:
-	import sys
-	import os
-	import platform
-	#
-	if platform.system() == "Windows":
-		py_mod = 'z:/python_modules'
-	elif platform.system() == "Linux":
-		py_mod = '/mnt/Synology/python_modules'
-	#
-	if os.path.exists(py_mod):
-		sys.path.append(py_mod)
-		#
-		from network_setups import RandomNW
-		from network_setups import SetupInitUDF
-		from setups import EquivCalcSetup
-	else:
-		sys.exit("path for modules is not correct\nPlease check it!!")
-		
+import modules_1
+import sys
 ################################################################
 ## 計算条件
 ##################
@@ -61,7 +40,7 @@ expand = 3
 # トポロジー変換に関する設定
 ################################################################
 # リスタートの有無
-restart = 1
+restart = 0
 ############################################################
 # プレ探索の条件：繰り返しサンプリング数、最小構造探索の繰り返し数
 pre_sampling = 1000
@@ -81,8 +60,8 @@ hist_bins = 50
 # ネットワークのタイプ
 ################################################################
 # nw_type = "Sunuke"		# 密度、末端間距離を設定値に合わせるように多重度を変化して、スヌケ鎖を設定
-# nw_type = "KG_NPT"		# 密度、末端間距離を設定値に合わせるように多重度を変化。 絡み合いが入らないように初期化
-nw_type = "KG_multi"		# 密度、末端間距離を設定値に合わせるように多重度を変化。 絡み合いが入るように初期化
+nw_type = "NPT"		# 密度、末端間距離を設定値に合わせるように多重度を変化。 絡み合いが入らないように初期化
+# nw_type = "KG_multi"		# 密度、末端間距離を設定値に合わせるように多重度を変化。 絡み合いが入るように初期化
 # nw_type = "KG_gel"		# 設定した多重度で、密度、末端間距離を設定値に合わせるように、溶剤を添加
 ##############################
 if nw_type == "Sunuke":
@@ -97,7 +76,7 @@ elif nw_type == "KG_multi":
 	l_bond = 0.97
 	c_n = 1.65
 	target_density = 0.85
-elif nw_type == "KG_NPT":
+elif nw_type == "NPT":
 	l_bond = 0.97
 	c_n = 1.26
 	target_density = 0.85
@@ -137,26 +116,26 @@ def main():
 	######################################
 	# 初期状態を設定し、基本となるデータを取得
 	args = sys.argv
-	init = RandomNW.InitialSetup(sim_cond, restart, args)
+	init = modules_1.RandomNW.InitialSetup(sim_cond, restart, args)
 	read_file_path, target_name, target_cond, base_top_list = init.get_base_data()
 	###################################################################################################
 	# トポロジーの異なるネットワークを探索して、任意の多重度のネットワークポリマーの代数的連結性の分布関数を策定
-	mod = RandomNW.ModifyTop(base_top_list, sim_cond, cond_top, target_cond, hist_bins, read_file_path)
+	mod = modules_1.RandomNW.ModifyTop(base_top_list, sim_cond, cond_top, target_cond, hist_bins, read_file_path)
 	top_dic_list = mod.find_top(restart)
 	###########################################
 	# ターゲットとなるネットワーク全体の辞書を設定。
-	setup = RandomNW.SetUp(top_dic_list, base_top_list, n_segments, n_sc)
+	setup = modules_1.RandomNW.SetUp(top_dic_list, base_top_list, n_segments, n_sc)
 	calcd_data_dic = setup.make_data_dic()
 
 	##################
 	# baseUDF の作成
-	baseudf = SetupInitUDF.MakeInitUDF(sim_cond, target_cond, files_cond, names, target_name, calcd_data_dic, expand)
-	target_dir = baseudf.setup_baseudf()
+	# baseudf = SetupInitUDF.MakeInitUDF(sim_cond, target_cond, files_cond, names, target_name, calcd_data_dic, expand)
+	# target_dir = baseudf.setup_baseudf()
 	
-	##################
-	# Init_UDF の作成
-	setup = EquivCalcSetup.SetUpUDF(nw_type, files_cond, target_name, py_mod, target_dir, names)
-	setup.setup_udf()
+	# ##################
+	# # Init_UDF の作成
+	# setup = EquivCalcSetup.SetUpUDF(nw_type, files_cond, target_name, py_mod, target_dir, names)
+	# setup.setup_udf()
 
 ################################################################################
 #      Main     #

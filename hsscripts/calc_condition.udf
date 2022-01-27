@@ -45,7 +45,7 @@ CalcCond:{"cognac112",1}
 SimulationCond:{
  {"Regular_NW",{"4_Chain"}{"4_Chain","Calc",{1000,100,1000,1000}{""}}}
  {
-  "Multi",
+  "Entangled",
   {20,0,3}
   {
    20,
