@@ -114,7 +114,7 @@ class ModifyTop:
 		self.pre_sampling = cond_top[1]
 		self.n_try = cond_top[2]
 		self.n_sampling = cond_top[3]
-		self.f_pool = 2
+		self.f_pool = 4
 		#
 		self.multi_nw = target_cond[5]
 		#
