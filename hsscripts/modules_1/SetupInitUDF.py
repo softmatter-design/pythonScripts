@@ -20,9 +20,10 @@ class MakeInitUDF:
 		elif nw_cond[0] == "Random_NW":
 			self.nw_model = 'RandNW'
 		self.strand = nw_cond[1]
-		self.n_segments = nw_cond[2]
-		self.n_cell = nw_cond[3]
-		self.n_sc = nw_cond[4]
+		self.n_strand = nw_cond[2]
+		self.n_segments = nw_cond[3]
+		self.n_cell = nw_cond[4]
+		self.n_sc = nw_cond[5]
 		#
 		self.sim_type = sim_cond[0]
 		self.multi_init = sim_cond[1]

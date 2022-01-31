@@ -122,12 +122,12 @@ class ModifyTop:
 		self.read_file_path = read_file_path
 	##########################
 	# 
-	def find_top(self, restart):
-		if restart != 1:
-			top_dic_list = self.top_search()
-		else:
-			top_dic_list = self.top_select()
-		return top_dic_list
+	# def find_top(self, restart):
+	# 	if restart != 1:
+	# 		top_dic_list = self.top_search()
+	# 	else:
+	# 		top_dic_list = self.top_select()
+	# 	return top_dic_list
 
 	#########################################################
 	# トポロジーの異なるネットワークを探索して、代数的連結性の分布関数を策定し、ネットワークトポロジーの配列辞書を決める。

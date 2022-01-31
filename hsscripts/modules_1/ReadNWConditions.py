@@ -8,32 +8,16 @@ from UDFManager import UDFManager
 #######################################################
 #
 def setupcondition():
-	# 
+	# check 'calc_condition.udf' and make it.
 	findudf()
+	# Read udf and setup initial conditions.
+	basic_cond, nw_cond, sim_cond, target_cond, condition_text = read_and_setcondition()
 
-	dic={'y':True,'yes':True,'q':False,'quit':False}
-	while True:
-		# read udf
-		basic_cond, nw_cond, sim_cond = readconditionudf()
-		# select
-		condsetup = CondSetup(nw_cond, sim_cond)
-		target_cond, condition_text = condsetup.calc_conditions()
-		print('Change UDF: type [r]eload')
-		print('Quit input process: type [q]uit')
-		inp = input('Condition is OK ==> [y]es >> ').lower()
-		if inp in dic:
-			inp = dic[inp]
-			break
-		print('##### \nRead Condition UDF again \n#####\n\n')
-	if inp:
-		print("\n\nSetting UP progress !!")
-	else:
-		sys.exit("##### \nQuit !!")
-	
 	return basic_cond, nw_cond, sim_cond, target_cond, condition_text
+	
 
 ###########################################
-# 
+# check 'calc_condition.udf' and make it.
 def findudf():
 	if not os.path.isfile('./calc_condition.udf'):
 		print()
@@ -44,7 +28,7 @@ def findudf():
 		input('Press ENTER to continue...')
 	return
 ###########################################
-# 
+# make new udf when not found.
 def makenewudf():
 	contents = '''
 	\\begin{def}
@@ -59,7 +43,7 @@ def makenewudf():
 				Random_NW:{chains:select{"3_Chain", "4_Chain", "5_Chain", "6_Chain", "7_Chain"} "分岐の数と種類を選択",
 					Calc_Topolpgy:select{"Calc", "Read"} "ランダムネットワークの「計算を行うか、読み込むか」を選択",
 						Calc:{pre_sampling:int "プレサンプリング数", pre_try:int "プレサンプリング時の再トライ数", sampling:int "サンプリング数", try:int "サンプリング時の再トライ数", n_parallel:int "並行計算のCPU数"} "ランダムサーチ計算する場合の条件を設定",
-						Read:{file_name:string} "過去の計算結果のディレクトリを記入"
+						Read:{dir_name:string} "過去の計算結果のディレクトリを記入"
 					} "ランダム構造での条件を入力"
 				} "シミュレーションの条件を設定"
 			Type:{
@@ -111,7 +95,30 @@ def makenewudf():
 	return
 
 ###########################################
-# 
+# Read udf and setup initial conditions
+def read_and_setcondition():
+	dic={'y':True,'yes':True,'q':False,'quit':False}
+	while True:
+		# read udf
+		basic_cond, nw_cond, sim_cond = readconditionudf()
+		# select
+		condsetup = CondSetup(nw_cond, sim_cond)
+		target_cond, condition_text = condsetup.calc_conditions()
+		print('Change UDF: type [r]eload')
+		print('Quit input process: type [q]uit')
+		inp = input('Condition is OK ==> [y]es >> ').lower()
+		if inp in dic:
+			inp = dic[inp]
+			break
+		print('##### \nRead Condition UDF again \n#####\n\n')
+	if inp:
+		print("\n\nSetting UP progress !!")
+		return basic_cond, nw_cond, sim_cond, target_cond, condition_text
+	else:
+		sys.exit("##### \nQuit !!")
+
+####################################
+# Read condition udf
 def readconditionudf():
 	u = UDFManager('calc_condition.udf')
 
@@ -129,24 +136,6 @@ def readconditionudf():
 	basic_cond = [ver_cognac, blank_udf, base_udf, core]
 	#######################################################
 	## 計算ターゲット
-	###################
-	## Networkモデルの設定
-	nw_model = u.get('SimulationCond.Model.TargetModel')
-	###################
-	## Networkモデルの設定
-	if nw_model == "Regular_NW":
-		strand = u.get('SimulationCond.Model.Regular_NW.chains')
-	elif nw_model == "Random_NW":
-		strand = u.get('SimulationCond.Model.Random_NW.chains')
-		calc = u.get('SimulationCond.Model.Random_NW.Calc_Topolpgy')
-		if calc == 'Read':
-			restartfile = u.get('SimulationCond.Model.Random_NW.Read.file_name')
-			if os.path.exists(restartfile):
-				print('Read existing topology file !')
-			else:
-				sys.exit('Cannnot find topology file to read !!')
-		elif calc == 'Calc':
-			cond_top = u.get('SimulationCond.Model.Random_NW.Calc')
 	###################
 	## ポリマー鎖の設定
 	sim_type = u.get('SimulationCond.Type.SimType')
@@ -217,7 +206,9 @@ def readconditionudf():
 		step_press = []
 	else:
 		multi_init = 0
-	# 設定密度
+	#####################################
+	
+	#########################################
 	target_density = u.get('SimulationCond.target_density')
 	########################################################
 	l_bond = 0.97
@@ -230,10 +221,59 @@ def readconditionudf():
 		c_n = 1.7
 	else:
 		c_n = 1.75
-	#
-	nw_cond = [nw_model, strand, n_segments, n_cell, n_sc]
-	sim_cond = [sim_type, multi_init, target_density, expand, l_bond, c_n, step_press, nv]
 
+	###################
+	## Networkモデルの設定
+	nw_model = u.get('SimulationCond.Model.TargetModel')
+	###################
+	## Networkモデルの設定
+	if nw_model == "Regular_NW":
+		strand_type = u.get('SimulationCond.Model.Regular_NW.chains')
+		restart = ''
+		cond_top = []
+	elif nw_model == "Random_NW":
+		strand_type = u.get('SimulationCond.Model.Random_NW.chains')
+	################
+	if strand_type == "3_Chain" or strand_type == "3_Chain_S" or strand_type == "3_Chain_D":
+		n_strand = 3
+	elif strand_type == "4_Chain":
+		n_strand = 4
+	elif strand_type == "5_Chain":
+		n_strand = 5
+	elif strand_type == "6_Chain":
+		n_strand = 6
+	elif strand_type == "7_Chain":
+		n_strand = 7
+	elif strand_type == "8_Chain":
+		n_strand = 8
+	##############################################
+	if nw_model == "Random_NW":
+		calc = u.get('SimulationCond.Model.Random_NW.Calc_Topolpgy')
+		restart = ''
+		cond_top = []
+		if calc == 'Read':
+			restart = u.get('SimulationCond.Model.Random_NW.Read.dir_name')
+			print(restart)
+			cond_top = []
+			# if os.path.exists(restart):
+			# 	print('Read existing topology file !')
+			# else:
+			# 	sys.exit('Cannnot find topology file to read !!')
+			
+			if not os.path.exists(os.path.join(restart, 'init.pickle')):
+				exit("##########\ntarget directory does not exists.")
+			elif n_strand != int(restart.split('_')[0]):
+				sys.exit("##########\nnumber of strands: selected n_strand is different from original Calculation.")
+			elif n_cell != int(restart.split('_')[2]):
+				sys.exit("##########\nnumber of cells: selected n_cell is different from original Calculation.")
+			
+
+		elif calc == 'Calc':
+			cond_top = u.get('SimulationCond.Model.Random_NW.Calc')
+	#
+	nw_cond = [nw_model, strand_type, n_strand, n_segments, n_cell, n_sc]
+	sim_cond = [sim_type, multi_init, target_density, expand, l_bond, c_n, step_press, nv, restart, cond_top]
+	print(sim_cond)
 	return basic_cond, nw_cond, sim_cond
 
 ######################################
@@ -243,9 +283,10 @@ class CondSetup:
 	def __init__(self, nw_cond, sim_cond):
 		self.nw_model = nw_cond[0]
 		self.strand = nw_cond[1]
-		self.n_segments = nw_cond[2]
-		self.n_cell = nw_cond[3]
-		self.n_sc = nw_cond[4]
+		self.n_strand = nw_cond[2]
+		self.n_segments = nw_cond[3]
+		self.n_cell = nw_cond[4]
+		self.n_sc = nw_cond[5]
 		#
 		self.sim_type = sim_cond[0]
 		self.multi_init = sim_cond[1]
@@ -256,21 +297,10 @@ class CondSetup:
 		self.step_press = sim_cond[6]
 		self.nv = sim_cond[7]
 		#
-		if self.strand == "3_Chain" or self.strand == "3_Chain_S" or self.strand == "3_Chain_D":
-			self.n_strand = 3
-		elif self.strand == "4_Chain":
-			self.n_strand = 4
-		elif self.strand == "5_Chain":
-			self.n_strand = 5
-		elif self.strand == "6_Chain":
-			self.n_strand = 6
-		elif self.strand == "7_Chain":
-			self.n_strand = 7
-		elif self.strand == "8_Chain":
-			self.n_strand = 8
-	##########################################
+		
+	############################################
 	##### ネットワークポリマーの諸量を計算 ######
-	##########################################
+	############################################
 	#-----ネットワークポリマーの諸量を計算
 	def calc_conditions(self):
 		## 計算システムの諸量を計算して、出力
@@ -278,7 +308,41 @@ class CondSetup:
 		target_cond, condition_text = self.init_calc(e2e, n_chains, n_beads_unit, org_unitcell)
 		return target_cond, condition_text
 
-	################################################################################
+	#####################
+	#
+	def set_length(self):
+		e2e = self.l_bond*((self.n_segments + 1)*self.c_n)**0.5					# 理想鎖状態での末端間距離
+
+		if self.nw_model == "Regular_NW":
+			if self.strand == "3_Chain_S":
+				n_chains = 12						        					# サブチェインの本数
+				n_beads_unit = 8 + self.n_segments*(1 + self.n_sc)*n_chains		# ユニットセル当たりの粒子数
+				org_unitcell = (2*2**0.5)*e2e				        			# 理想鎖状態でのユニットセル長
+			elif self.strand == "3_Chain_D":
+				n_chains = 24						       
+				n_beads_unit = 16 + self.n_segments*(1 + self.n_sc)*n_chains	
+				org_unitcell = (2*2**0.5)*e2e		
+			elif self.strand == "4_Chain":
+				n_chains = 16						      
+				n_beads_unit = 8 + self.n_segments*(1 + self.n_sc)*n_chains	
+				org_unitcell = (4*3**0.5)*e2e/3			 
+			elif self.strand == "6_Chain":
+				n_chains = 3						  
+				n_beads_unit = 1 + self.n_segments*(1 + self.n_sc)*n_chains		
+				org_unitcell = e2e						      
+			elif self.strand == "8_Chain":
+				n_chains = 8						   
+				n_beads_unit = 2 + self.n_segments*(1 + self.n_sc)*n_chains   
+				org_unitcell = (2*3**0.5)*e2e/3	
+
+		elif self.nw_model == "Random_NW":
+			n_chains = self.n_strand
+			n_beads_unit = 2 + self.n_segments*(1 + self.n_sc)*n_chains
+			org_unitcell = (2*3**0.5)*e2e/3	
+
+		return e2e, n_chains, n_beads_unit, org_unitcell
+
+	###############################################################
 	def init_calc(self, e2e, n_chains, n_beads_unit, org_unitcell):
 		n_solvent = 0
 		flag = 0
@@ -394,35 +458,3 @@ class CondSetup:
 
 		return target_cond, text
 	
-
-	def set_length(self):
-		e2e = self.l_bond*((self.n_segments + 1)*self.c_n)**0.5					# 理想鎖状態での末端間距離
-
-		if self.nw_model == "Regular_NW":
-			if self.strand == "3_Chain_S":
-				n_chains = 12						        					# サブチェインの本数
-				n_beads_unit = 8 + self.n_segments*(1 + self.n_sc)*n_chains		# ユニットセル当たりの粒子数
-				org_unitcell = (2*2**0.5)*e2e				        			# 理想鎖状態でのユニットセル長
-			elif self.strand == "3_Chain_D":
-				n_chains = 24						       
-				n_beads_unit = 16 + self.n_segments*(1 + self.n_sc)*n_chains	
-				org_unitcell = (2*2**0.5)*e2e		
-			elif self.strand == "4_Chain":
-				n_chains = 16						      
-				n_beads_unit = 8 + self.n_segments*(1 + self.n_sc)*n_chains	
-				org_unitcell = (4*3**0.5)*e2e/3			 
-			elif self.strand == "6_Chain":
-				n_chains = 3						  
-				n_beads_unit = 1 + self.n_segments*(1 + self.n_sc)*n_chains		
-				org_unitcell = e2e						      
-			elif self.strand == "8_Chain":
-				n_chains = 8						   
-				n_beads_unit = 2 + self.n_segments*(1 + self.n_sc)*n_chains   
-				org_unitcell = (2*3**0.5)*e2e/3	
-
-		elif self.nw_model == "Random_NW":
-			n_chains = self.n_strand
-			n_beads_unit = 2 + self.n_segments*(1 + self.n_sc)*n_chains
-			org_unitcell = (2*3**0.5)*e2e/3	
-
-		return e2e, n_chains, n_beads_unit, org_unitcell
