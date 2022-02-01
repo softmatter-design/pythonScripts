@@ -7,11 +7,14 @@ import numpy as np
 ######################################
 class NWSetup:
 	def __init__(self, nw_cond, target_cond):
+		self.nw_model = nw_cond[0]
 		self.strand = nw_cond[1]
 		self.n_strand = nw_cond[2]
 		self.n_segments = nw_cond[3]
 		self.n_cell = nw_cond[4]
 		self.n_sc = nw_cond[5]
+		self.l_bond = nw_cond[6]
+		self.c_n = nw_cond[7]
 
 		self.multi = target_cond[5]
 
@@ -20,15 +23,16 @@ class NWSetup:
 	################################################################################
 	def calc_all(self):
 		# 架橋点 JP を設定
-		jp_xyz, subchain_se_xyz = self.calc_jp_subChains()
+		jp_xyz, strand_se_xyz = self.calc_jp_strands()
 		#
-		calcd_data_dic = self.set_atom(jp_xyz, subchain_se_xyz)
+		calcd_data_dic = self.set_atom(jp_xyz, strand_se_xyz)
+		
 		return calcd_data_dic
 	################################################################################
 	# JPおよびサブチェインの始点と終点のXYZを設定
-	def calc_jp_subChains(self):
+	def calc_jp_strands(self):
 		# jp_xyz は、JPの座標のリスト
-		# subchain_se_xyz は、サブチェインの出発点と終点のリスト
+		# strand_se_xyz は、サブチェインの出発点と終点のリスト
 		if self.strand == "3_Chain_S":
 			# JPを設定
 			jp_xyz = [
@@ -44,7 +48,7 @@ class NWSetup:
 			]
 			]
 			# サブチェインの出発点と終点を設定
-			subchain_se_xyz = [
+			strand_se_xyz = [
 			[
 			[[0, 0, 0], [0, 0.25, 0.25]],
 			[[0, 0.25, 0.25], [0.25, 0.25, 0.5]],
@@ -86,7 +90,7 @@ class NWSetup:
 			]
 			]
 			# サブチェインの出発点と終点を設定
-			subchain_se_xyz = [
+			strand_se_xyz = [
 			[
 			[[0, 0, 0], [0, 0.25, 0.25]],
 			[[0, 0.25, 0.25], [0.25, 0.25, 0.5]],
@@ -132,7 +136,7 @@ class NWSetup:
 			]
 			]
 			# サブチェインの出発点と終点を設定
-			subchain_se_xyz = [
+			strand_se_xyz = [
 			[
 			[[0.25, 0.25, 0.25], [0.0, 0.0, 0.0]],	# No.1
 			[[0.25, 0.25, 0.25], [0.0, 0.5, 0.5]],
@@ -161,7 +165,7 @@ class NWSetup:
 			]
 			]
 			# サブチェインの出発点と終点を設定
-			subchain_se_xyz = [
+			strand_se_xyz = [
 			[
 			[[0., 0., 0.], [1, 0, 0]],
 			[[0., 0., 0.], [0, 1, 0]],
@@ -178,7 +182,7 @@ class NWSetup:
 			]
 			]
 			# サブチェインの出発点と終点を設定
-			subchain_se_xyz = [
+			strand_se_xyz = [
 			[
 			[[0.5, 0.5, 0.5], [0, 0, 0]],
 			[[0.5, 0.5, 0.5], [1, 0, 0]],
@@ -191,10 +195,10 @@ class NWSetup:
 			]
 			]
 
-		return jp_xyz, subchain_se_xyz
+		return jp_xyz, strand_se_xyz
 
 	#########################################################
-	def set_atom(self, jp_xyz, subchain_se_xyz):
+	def set_atom(self, jp_xyz, strand_se_xyz):
 		calcd_data_dic={}
 		count = 0
 		for i in (range(self.multi)):
@@ -207,7 +211,7 @@ class NWSetup:
 				pos_all.update(jp_xyz_dic)
 				# print(jp_xyz_dic)
 				# サブチェイン中の各アトムのxyzリストとボンドリストを作成
-				strand_xyz, bond_all, atom_sc, angle_all = self.set_subchains(jp_id_dic, subchain_se_xyz[mol], mol)
+				strand_xyz, bond_all, atom_sc, angle_all = self.set_strands(jp_id_dic, strand_se_xyz[mol], mol)
 				#
 				atom_all.extend(atom_sc)
 				pos_all.update(strand_xyz)
@@ -237,7 +241,7 @@ class NWSetup:
 		
 	#########################################################
 	# サブチェイン中の各アトムのxyzリストとボンドリストを作成
-	def set_subchains(self, jp_id_dic, subchain_se_xyz, mol):
+	def set_strands(self, jp_id_dic, strand_se_xyz, mol):
 		strand_xyz = {}
 		bond_all = {}
 		atom_sc = []
@@ -248,8 +252,8 @@ class NWSetup:
 			for y in range(self.n_cell):
 				for x in range(self.n_cell):
 					b_xyz = (x,y,z)
-					for se_xyz in subchain_se_xyz:
-						tmp_xyz, tmp_bond, new_sub_id, new_bond_id, tmp_atom_sc, tmp_angle = self.calc_single_subchain(jp_id_dic, sub_id, bond_id, b_xyz, se_xyz, mol)
+					for se_xyz in strand_se_xyz:
+						tmp_xyz, tmp_bond, new_sub_id, new_bond_id, tmp_atom_sc, tmp_angle = self.calc_single_strand(jp_id_dic, sub_id, bond_id, b_xyz, se_xyz, mol)
 						strand_xyz.update(tmp_xyz)
 						bond_all.update(tmp_bond)
 						atom_sc.extend(tmp_atom_sc)
@@ -260,7 +264,7 @@ class NWSetup:
 
 	###############################################################
 	# 一本のサブチェイン中の各アトムのxyzリストとボンドリストを作成
-	def calc_single_subchain(self, jp_id_dic, sub_id, bond_id, b_xyz, se_xyz, mol):
+	def calc_single_strand(self, jp_id_dic, sub_id, bond_id, b_xyz, se_xyz, mol):
 		tmp_xyz = {}
 		tmp_bond = {}
 		tmp_angle = []

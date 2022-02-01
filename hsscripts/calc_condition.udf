@@ -16,8 +16,8 @@
 				} "シミュレーションの条件を設定"
 			Type:{
 				SimType:select{
-					"Entangled",
 					"NPT",
+					"Entangled",
 					"Multi",   
 					"Multi_entangled",
 					"Gel",    
@@ -25,15 +25,19 @@
 					"Gel_concd",
 					"Gel_concd_entangled"
 					} "アンサンブル等のシミュレーションの条件を選択",
-					Entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数"} "密度、末端間距離を設定値に合わせるように多重度を自動設定。\n絡み合いが入るように初期化",
 					NPT:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", ExpansionRatio: float "NPT 計算での初期膨張率", StepPress[]: float "NPT 計算での圧力変化"} "密度、末端間距離を設定値に合わせるように多重度を自動設定。\n絡み合いが入らないようにNPTで縮める。",
+					Entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Step_rfc[]: float "Slow Push Off での rfc 条件"} "密度、末端間距離を設定値に合わせるように多重度を自動設定。\n絡み合いが入るように初期化",
 					Multi:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", ExpansionRatio: float "NPT 計算での初期膨張率", StepPress[]: float "NPT 計算での圧力変化"} "設定した多重度で、密度を設定値になるように、システムサイズを縮める",
-					Multi_entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能"} "設定した多重度で、密度を設定値になるようにシステムサイズを縮め、絡み合いが入るように初期化",
+					Multi_entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", Step_rfc[]: float "Slow Push Off での rfc 条件"} "設定した多重度で、密度を設定値になるようにシステムサイズを縮め、絡み合いが入るように初期化",
 					Gel:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", ExpansionRatio: float "NPT 計算での初期膨張率", StepPress[]: float "NPT 計算での圧力変化"} "設定した多重度で、密度、末端間距離を設定値に合わせるように溶剤を添加",
-					Gel_entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能"} "設定した多重度で、密度、末端間距離を設定値に合わせるように溶剤を添加、絡み合いが入るように初期化",
+					Gel_entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", Step_rfc[]: float "Slow Push Off での rfc 条件"} "設定した多重度で、密度、末端間距離を設定値に合わせるように溶剤を添加、絡み合いが入るように初期化",
 					Gel_concd:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", NV: float "Non Volatile: 固形分量 (0 to 1.0)", ExpansionRatio: float "NPT 計算での初期膨張率", StepPress[]: float "NPT 計算での圧力変化"} "設定した多重度で、溶剤量変化",
-					Gel_concd_entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", NV: float "Non Volatile: 固形分量 (0 to 1.0)"} "設定した多重度で、溶剤量変化、絡み合いが入るように初期化"
-				} "アンサンブル等のシミュレーションの条件を選択"
+					Gel_concd_entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", NV: float "Non Volatile: 固形分量 (0 to 1.0)", Step_rfc[]: float "Slow Push Off での rfc 条件"} "設定した多重度で、溶剤量変化、絡み合いが入るように初期化"
+				} "アンサンブル等のシミュレーションの条件を選択",
+			Equilib_Condition:{
+					repeat: int "平衡化計算の繰り返し数",
+					Time:{delta_T: double, Total_Steps: int, Output_Interval_Steps: int} "平衡化計算の時間条件を入力"
+				},
 			target_density:float "平衡化シミュレーション実行時に使用する密度"
 			} "シミュレーションの条件を設定"
 	\end{def}
@@ -43,10 +47,9 @@
 \begin{data}
 CalcCond:{"cognac112",1}
 SimulationCond:{
- {"Regular_NW",{"4_Chain"}{"4_Chain","Read",{1000,100,1000,100,4}{"4_chains_3_cells_1000_trials_1000_sampling"}}}
+ {"Regular_NW",{"4_Chain"}{"4_Chain","Read",{1000,100,1000,100,1}{""}}}
  {
-  "NPT",
-  {20,0,3}
+  "Gel",
   {
    20,
    0,
@@ -58,11 +61,8 @@ SimulationCond:{
    20,
    0,
    3,
-   1,
-   2.0000000,
-   [0.2000000,0.5000000,1.0000000,2.0000000,5.0000000,6.5000000,7.0000000]
+   [1.0730000,1.0000000,0.9000000,0.8000000]
   }
-  {20,0,3,1}
   {
    20,
    0,
@@ -71,18 +71,47 @@ SimulationCond:{
    2.0000000,
    [0.2000000,0.5000000,1.0000000,2.0000000,5.0000000,6.5000000,7.0000000]
   }
-  {20,0,3,2}
   {
    20,
    0,
    3,
-   2,
+   1,
+   [1.0730000,1.0000000,0.9000000,0.8000000]
+  }
+  {
+   20,
+   0,
+   3,
+   1,
+   2.0000000,
+   [0.2000000,0.5000000,1.0000000,2.0000000,5.0000000,6.5000000,7.0000000]
+  }
+  {
+   20,
+   0,
+   3,
+   1,
+   [1.0730000,1.0000000,0.9000000,0.8000000]
+  }
+  {
+   20,
+   0,
+   3,
+   1,
    0.5000000,
    2.0000000,
    [0.2000000,0.5000000,1.0000000,2.0000000,5.0000000,6.5000000,7.0000000]
   }
-  {20,0,3,2,0.5000000}
+  {
+   20,
+   0,
+   3,
+   1,
+   0.5000000,
+   [1.0730000,1.0000000,0.9000000,0.8000000]
+  }
  }
+ {4,{1.00000000000000e-02,200000,1000}}
  0.8500000
 }
 \end{data}

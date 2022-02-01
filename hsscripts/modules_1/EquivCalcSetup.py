@@ -19,11 +19,12 @@ class SetUpUDF:
 		self.sim_type = sim_cond[0]
 		self.multi_init = sim_cond[1]
 		self.target_density = sim_cond[2]
-		self.expand = sim_cond[3]
-		self.l_bond = sim_cond[4]
-		self.c_n = sim_cond[5]
-		self.step_press = sim_cond[6]
-		self.nv = sim_cond[7]
+		self.nv = sim_cond[3]
+		self.expand = sim_cond[4]
+		self.step_press = sim_cond[5]
+		self.rfc = sim_cond[6]
+		self.equilib_repeat = sim_cond[7]
+		self.equilib_time = sim_cond[8]
 		#
 		self.target_dir = target_dir
 		self.f_eval_py = 'evaluate_all.py'
