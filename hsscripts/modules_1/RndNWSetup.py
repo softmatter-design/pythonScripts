@@ -10,13 +10,109 @@ import sys
 import os
 import pickle
 from multiprocessing import Pool
-################################################################################
+
+# import modules_1
+# ################################################################################
+# class SelectSet:
+# 	def __init__(self, nw_cond, target_cond):
+# 		self.nw_cond = nw_cond
+
+# 		self.nw_model = nw_cond[0]
+# 		self.strand = nw_cond[1]
+# 		self.n_strand = nw_cond[2]
+# 		self.n_segments = nw_cond[3]
+# 		self.n_cell = nw_cond[4]
+# 		self.n_sc = nw_cond[5]
+# 		self.l_bond = nw_cond[6]
+# 		self.c_n = nw_cond[7]
+
+# 		self.multi = target_cond[5]
+
+# 	############################
+# 	def select_set(self):
+# 		# ネットワークを設定
+# 		if self.nw_model == "Regular_NW":
+# 			nwsetup = modules_1.RegNWSetup.NWSetup(self.nw_cond, self.multi)
+# 			calcd_data_dic = nwsetup.calc_all()
+# 		else:
+			
+# 		return calcd_data_dic
+
+# ################################################################
+
+# 	make8 = modules_1.RandomNW_mod_2.Make8(sim_cond)
+# 	base_top_list = make8.make8()
+
+
+
+
+
+
+
+
+
+# 	n_multi = 5
+
+# 	if restart == 0:
+# 		# トポロジーの異なるネットワークを探索して、任意の多重度のネットワークポリマーの代数的連結性の分布関数を策定
+# 		mod = modules_1.RandomNW_mod_2.ModifyTop(base_top_list, sim_cond, cond_top, target_cond, hist_bins, read_file_path)
+# 		candidate_list, target_dir = mod.top_search()
+# 	else:
+# 		sel = modules_1.RandomNW_mod_2.Select(read_file_path, hist_bins, n_multi)
+# 		candidate_list, target_dir = sel.top_select()
+
+# 	sel = modules_1.RandomNW_mod_2.Select(target_dir, hist_bins, n_multi)
+# 	top_dic_list = sel.nw_search(candidate_list, target_dir)
+	
+# 	###########################################
+# 	# ターゲットとなるネットワーク全体の辞書を設定。
+# 	setup = modules_1.RandomNW_mod_2.SetUp(top_dic_list, base_top_list, n_segments, n_sc)
+# 	calcd_data_dic = setup.make_data_dic()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ################################################################################
 ## トポロジーの異なるネットワークを探索して、代数的連結性の分布関数を策定
 ################################################################################
 class Make8:
-	def __init__(self, sim_cond):
-		self.n_cell = sim_cond[3]
+	def __init__(self, nw_cond):
+		self.n_cell = nw_cond[4]
 		
 		# ユニットセルでの、jp およびサブチェインの始点と終点のXYZを設定
 		self.jp_xyz = [
@@ -35,6 +131,7 @@ class Make8:
 					]
 		self.start_jp = [0.5, 0.5, 0.5]
 	
+	##################################################
 	def make8(self):
 		# 基準となる8_Chainネットワークを設定
 		base_top_list = self.make_8chain_dic()
@@ -104,18 +201,18 @@ class Make8:
 ## トポロジーの異なるネットワークを探索して、代数的連結性の分布関数を策定
 ################################################################################
 class ModifyTop:
-	def __init__(self, base_top_list, sim_cond, cond_top, target_cond, hist_bins, read_file_path):
+	def __init__(self, base_top_list, nw_cond, cond_top, target_cond, hist_bins, read_file_path):
 		self.init_dic = base_top_list[0]
 		self.n_jp = base_top_list[3]
 		#
-		self.n_cell = sim_cond[3]
-		self.n_strand = sim_cond[6]
-		#
+		self.n_strand = nw_cond[2]
+		self.n_cell = nw_cond[4]
+		
 		self.pre_try = cond_top[0] 
 		self.pre_sampling = cond_top[1]
 		self.n_try = cond_top[2]
 		self.n_sampling = cond_top[3]
-		self.f_pool = 4
+		self.f_pool = cond_top[4]
 		#
 		self.multi_nw = target_cond[5]
 		#
@@ -389,10 +486,12 @@ class ModifyTop:
 ## トポロジーの異なるネットワークを探索して、代数的連結性の分布関数を策定
 ################################################################################
 class Select:
-	def __init__(self, read_file_path, hist_bins, multi = 3):
+	def __init__(self, read_file_path, hist_bins, target_cond):
 		self.read_file_path = read_file_path
 		self.hist_bins = hist_bins
-		self.multi_nw = multi
+
+		self.multi_nw = target_cond[5]
+
 	##########################
 	#########################################################
 	# 過去の探索データを使って、代数的連結性の分布関数を選択

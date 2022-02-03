@@ -7,14 +7,14 @@ import numpy as np
 ######################################
 class NWSetup:
 	def __init__(self, nw_cond, target_cond):
-		self.nw_model = nw_cond[0]
+		# self.nw_model = nw_cond[0]
 		self.strand = nw_cond[1]
-		self.n_strand = nw_cond[2]
+		# self.n_strand = nw_cond[2]
 		self.n_segments = nw_cond[3]
 		self.n_cell = nw_cond[4]
 		self.n_sc = nw_cond[5]
-		self.l_bond = nw_cond[6]
-		self.c_n = nw_cond[7]
+		# self.l_bond = nw_cond[6]
+		# self.c_n = nw_cond[7]
 
 		self.multi = target_cond[5]
 

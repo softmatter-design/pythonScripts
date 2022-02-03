@@ -47,9 +47,9 @@
 \begin{data}
 CalcCond:{"cognac112",1}
 SimulationCond:{
- {"Regular_NW",{"4_Chain"}{"4_Chain","Read",{1000,100,1000,100,1}{""}}}
+ {"Random_NW",{"4_Chain"}{"4_Chain","Calc",{1000,100,1000,100,2}{"4_chains_3_cells_100_trials_100_sampling"}}}
  {
-  "Gel",
+  "Multi",
   {
    20,
    0,

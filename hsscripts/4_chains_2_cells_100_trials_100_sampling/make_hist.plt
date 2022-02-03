@@ -12,6 +12,6 @@ set xlabel "Arg. Con."
 set ylabel "Freq."
 
 set style fill solid 0.5
-set boxwidth 0.012139999999999984
+set boxwidth 0.032920000000000005
 #
 plot data w boxes noti
