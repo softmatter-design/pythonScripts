@@ -41,6 +41,7 @@ class SelectSet:
 
 		return calcd_data_dic
 	
+	#######################################
 	def regnw_setup(self):
 		nwsetup = modules_1.RegNWSetup.NWSetup(self.nw_cond, self.target_cond)
 		calcd_data_dic = nwsetup.calc_all()
@@ -50,7 +51,6 @@ class SelectSet:
 		make8 = modules_1.RndNWSetup.Make8(self.nw_cond)
 		base_top_list = make8.make8()
 
-		print(self.restart)
 		if self.restart == '':
 			# トポロジーの異なるネットワークを探索して、任意の多重度のネットワークポリマーの代数的連結性の分布関数を策定
 			mod = modules_1.RndNWSetup.ModifyTop(base_top_list, self.nw_cond, self.cond_top, self.target_cond, 50, self.restart)
@@ -62,14 +62,12 @@ class SelectSet:
 		sel = modules_1.RndNWSetup.Select(self.restart, 50, self.target_cond)
 		top_dic_list = sel.nw_search(candidate_list, target_dir)
 
-		return top_dic_list
+		###########################################
+		# ターゲットとなるネットワーク全体の辞書を設定。
+		setup = modules_1.RndNWSetup.SetUp(top_dic_list, base_top_list, self.n_segments, self.n_sc)
+		calcd_data_dic = setup.make_data_dic()
 
-	# 	###########################################
-	# 	# ターゲットとなるネットワーク全体の辞書を設定。
-	# 	setup = modules_1.RandomNW_mod_2.SetUp(top_dic_list, base_top_list, n_segments, n_sc)
-	# 	calcd_data_dic = setup.make_data_dic()
-
-		# return calcd_data_dic
+		return calcd_data_dic
 
 
 
