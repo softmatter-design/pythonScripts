@@ -34,12 +34,6 @@ class Make8:
 					]
 		self.start_jp = [0.5, 0.5, 0.5]
 	
-	##################################################
-	def make8(self):
-		# 基準となる8_Chainネットワークを設定
-		base_top_list = self.make_8chain_dic()
-		return base_top_list
-	
 	###########################################
 	# 基本構造として、8Chainモデルを設定
 	def make_8chain_dic(self):
@@ -104,7 +98,7 @@ class Make8:
 ## トポロジーの異なるネットワークを探索して、代数的連結性の分布関数を策定
 ################################################################################
 class ModifyTop:
-	def __init__(self, base_top_list, nw_cond, cond_top, target_cond, hist_bins, read_file_path):
+	def __init__(self, base_top_list, nw_cond, cond_top, target_cond, hist_bins):
 		self.init_dic = base_top_list[0]
 		self.n_jp = base_top_list[3]
 		#
@@ -120,7 +114,6 @@ class ModifyTop:
 		self.multi_nw = target_cond[5]
 		#
 		self.hist_bins = hist_bins
-		self.read_file_path = read_file_path
 
 	#########################################################
 	# トポロジーの異なるネットワークを探索して、代数的連結性の分布関数を策定し、ネットワークトポロジーの配列辞書を決める。
@@ -145,18 +138,6 @@ class ModifyTop:
 		# top_dic_list = self.nw_search(candidate_list, target_dir)
 		#
 		return candidate_list, target_dir
-	
-	# #########################################################
-	# # 過去の探索データを使って、代数的連結性の分布関数を選択
-	# def top_select(self):
-	# 	with open(os.path.join(self.read_file_path, 'init.pickle'), mode = 'rb') as f:
-	# 		candidate_list = pickle.load(f)
-	# 	print("##################################################")
-	# 	print("Reloaded Candidates = ", len(candidate_list))
-	# 	print("##################################################")
-	# 	# # ヒストグラム中の最大頻度を与えるネットワークトポロジーの配列辞書を決める。
-	# 	# top_dic_list = self.nw_search(candidate_list, self.read_file_path)
-	# 	return candidate_list, self.read_file_path
 
 	#####################################################
 	# 任意のストランドを選択し、ストランドの繋ぎ変えを行う

@@ -43,7 +43,8 @@ def makenewudf():
 				Random_NW:{chains:select{"3_Chain", "4_Chain", "5_Chain", "6_Chain", "7_Chain"} "分岐の数と種類を選択",
 					Calc_Topolpgy:select{"Calc", "Read"} "ランダムネットワークの「計算を行うか、読み込むか」を選択",
 						Calc:{pre_sampling:int "プレサンプリング数", pre_try:int "プレサンプリング時の再トライ数", sampling:int "サンプリング数", try:int "サンプリング時の再トライ数", n_parallel:int "並行計算のCPU数"} "ランダムサーチ計算する場合の条件を設定",
-						Read:{dir_name:string} "過去の計算結果のディレクトリを記入"
+						Read:{dir_name:string} "過去の計算結果のディレクトリを記入",
+					N_histgram:int "ヒストグラムの分割数"
 					} "ランダム構造での条件を入力"
 				} "シミュレーションの条件を設定"
 			Type:{
@@ -78,7 +79,7 @@ def makenewudf():
 		CalcCond:{"cognac112", 1}
 
 		SimulationCond:{
-			{"Regular_NW", {"4_Chain"}, {"4_Chain", "Calc", {1000, 100, 1000, 100, 1}, {""}}}
+			{"Regular_NW", {"4_Chain"}, {"4_Chain", "Calc", {1000, 100, 1000, 100, 1}, {""}, 50}}
 			{"NPT",
 				{20, 0, 3, 2.0, [0.2, 0.5, 1.0, 2.0, 3.0, 4.5]},
 				{20, 0, 3, [1.073, 1.0, 0.9, 0.8]},
@@ -244,6 +245,7 @@ def readconditionudf():
 		strand_type = u.get('SimulationCond.Model.Regular_NW.chains')
 		restart = ''
 		cond_top = []
+		n_hist = 0
 	elif nw_model == "Random_NW":
 		strand_type = u.get('SimulationCond.Model.Random_NW.chains')
 	################
@@ -264,6 +266,7 @@ def readconditionudf():
 		calc = u.get('SimulationCond.Model.Random_NW.Calc_Topolpgy')
 		restart = ''
 		cond_top = []
+		n_hist = u.get('SimulationCond.Model.Random_NW.N_histgram')
 		if calc == 'Read':
 			restart = u.get('SimulationCond.Model.Random_NW.Read.dir_name')
 
@@ -279,7 +282,8 @@ def readconditionudf():
 	#
 	nw_cond = [nw_model, strand_type, n_strand, n_segments, n_cell, n_sc, l_bond, c_n]
 	sim_cond = [sim_type, multi_init, target_density, nv, expand, step_press, step_rfc, equilib_repeat, equilib_time]
-	rnd_cond = [restart, cond_top]
+	rnd_cond = [restart, cond_top, n_hist]
+
 	return basic_cond, nw_cond, sim_cond, rnd_cond
 
 ######################################
@@ -482,6 +486,8 @@ class CondSetup:
 			f.write(text)
 		#
 		target_cond = [system, unit_cell, total_net_atom, nu, self.nw_model, fin_multi, n_solvent]
+		#
+		mod_sim_cond = [e2e, shrinkage, err_dens, mod_e2e]
 
 		return target_cond, text
 	

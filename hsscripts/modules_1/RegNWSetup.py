@@ -238,7 +238,6 @@ class NWSetup:
 						jp_id += 1
 		return jp_id_dic, jp_xyz_dic, atom_jp
 
-		
 	#########################################################
 	# サブチェイン中の各アトムのxyzリストとボンドリストを作成
 	def set_strands(self, jp_id_dic, strand_se_xyz, mol):
