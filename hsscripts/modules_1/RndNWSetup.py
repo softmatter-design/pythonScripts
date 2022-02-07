@@ -111,7 +111,7 @@ class ModifyTop:
 		self.n_sampling = cond_top[3]
 		self.f_pool = cond_top[4]
 		#
-		self.multi_nw = target_cond[5]
+		self.multi_nw = target_cond[0]
 		#
 		self.hist_bins = hist_bins
 
@@ -133,10 +133,6 @@ class ModifyTop:
 		print("Initial Candidates = ", len(candidate_list))
 		print("##################################################")
 
-
-		# # ヒストグラム中の最大頻度を与えるネットワークトポロジーの配列辞書を決める。
-		# top_dic_list = self.nw_search(candidate_list, target_dir)
-		#
 		return candidate_list, target_dir
 
 	#####################################################
@@ -351,13 +347,6 @@ class ModifyTop:
 		return lap_mat
 
 
-
-
-
-
-
-
-
 ################################################################################
 ## トポロジーの異なるネットワークを探索して、代数的連結性の分布関数を策定
 ################################################################################
@@ -366,7 +355,7 @@ class Select:
 		self.read_file_path = read_file_path
 		self.hist_bins = hist_bins
 
-		self.multi_nw = target_cond[5]
+		self.multi_nw = target_cond[0]
 
 	##########################
 	#########################################################
@@ -379,12 +368,6 @@ class Select:
 		print("##################################################")
 
 		return candidate_list, self.read_file_path
-
-
-
-
-
-
 
 
 	#####################################################################
@@ -454,34 +437,6 @@ class Select:
 			high = float(input("high=: "))
 			val_range = list([low, high])
 		return val_range
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

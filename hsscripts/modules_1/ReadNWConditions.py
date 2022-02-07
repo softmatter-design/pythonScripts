@@ -11,9 +11,9 @@ def setupcondition():
 	# check 'calc_condition.udf' and make it.
 	findudf()
 	# Read udf and setup initial conditions.
-	basic_cond, nw_cond, sim_cond, rnd_cond, target_cond, condition_text = read_and_setcondition()
+	basic_cond, nw_cond, sim_cond, rnd_cond, target_cond = read_and_setcondition()
 
-	return basic_cond, nw_cond, sim_cond, rnd_cond, target_cond, condition_text 
+	return basic_cond, nw_cond, sim_cond, rnd_cond, target_cond
 	
 
 ###########################################
@@ -109,7 +109,7 @@ def read_and_setcondition():
 		basic_cond, nw_cond, sim_cond, rnd_cond = readconditionudf()
 		# select
 		condsetup = CondSetup(nw_cond, sim_cond)
-		target_cond, condition_text = condsetup.calc_conditions()
+		target_cond = condsetup.calc_conditions()
 		print('Change UDF: type [r]eload')
 		print('Quit input process: type [q]uit')
 		inp = input('Condition is OK ==> [y]es >> ').lower()
@@ -119,7 +119,7 @@ def read_and_setcondition():
 		print('##### \nRead Condition UDF again \n#####\n\n')
 	if inp:
 		print("\n\nSetting UP progress !!")
-		return basic_cond, nw_cond, sim_cond, rnd_cond, target_cond, condition_text
+		return basic_cond, nw_cond, sim_cond, rnd_cond, target_cond
 	else:
 		sys.exit("##### \nQuit !!")
 
@@ -317,8 +317,8 @@ class CondSetup:
 	def calc_conditions(self):
 		## 計算システムの諸量を計算して、出力
 		e2e, n_chains, n_beads_unit, org_unitcell = self.set_length()
-		target_cond, condition_text = self.init_calc(e2e, n_chains, n_beads_unit, org_unitcell)
-		return target_cond, condition_text
+		target_cond = self.init_calc(e2e, n_chains, n_beads_unit, org_unitcell)
+		return target_cond
 
 	#####################
 	#
@@ -485,9 +485,7 @@ class CondSetup:
 		with open("calc_conditions.txt", 'w') as f:
 			f.write(text)
 		#
-		target_cond = [system, unit_cell, total_net_atom, nu, self.nw_model, fin_multi, n_solvent]
-		#
-		mod_sim_cond = [e2e, shrinkage, err_dens, mod_e2e]
+		target_cond = [fin_multi, system, unit_cell, total_net_atom, nu, self.nw_model, n_solvent, e2e, mod_e2e, shrinkage, err_dens]
 
-		return target_cond, text
+		return target_cond
 	

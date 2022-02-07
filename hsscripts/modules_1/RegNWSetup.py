@@ -16,7 +16,7 @@ class NWSetup:
 		# self.l_bond = nw_cond[6]
 		# self.c_n = nw_cond[7]
 
-		self.multi = target_cond[5]
+		self.multi = target_cond[0]
 
 	################################################################################
 	# レギュラー・ネットワーク設定

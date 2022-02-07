@@ -8,7 +8,7 @@ from UDFManager import UDFManager
 # Initial_UDF の作成
 ##########################################
 class MakeInitUDF:
-	def __init__(self, basic_cond, nw_cond, sim_cond, target_cond, calcd_data_dic, condition_text):
+	def __init__(self, basic_cond, nw_cond, sim_cond, target_cond, calcd_data_dic):
 		#
 		self.ver_cognac = basic_cond[0]
 		self.blank_udf = basic_cond[1]
@@ -37,16 +37,15 @@ class MakeInitUDF:
 		self.equilib_repeat = sim_cond[7]
 		self.equilib_time = sim_cond[8]
 		#
-		self.system_size = target_cond[0]
-		self.unit_cell = target_cond[1]
-		self.total_atom = target_cond[2]
-		self.nu = target_cond[3]
-		self.structure = target_cond[4]
-		self.multi = target_cond[5]
+		self.multi = target_cond[0]
+		self.system_size = target_cond[1]
+		self.unit_cell = target_cond[2]
+		self.total_atom = target_cond[3]
+		self.nu = target_cond[4]
+		self.structure = target_cond[5]
 		self.n_solvent = target_cond[6]
 		#
 		self.calcd_data_dic = calcd_data_dic
-		self.cond_txt = condition_text
 		# 条件設定
 		# Cognac用の名称設定
 		self.nw_name = "Network"
@@ -92,8 +91,8 @@ class MakeInitUDF:
 		os.makedirs(target_dir, exist_ok = True)
 		with open(os.path.join(target_dir, "calc.dat"), "w") as f:
 			f.write("# segments\tbond_length\tCN\tfunc\tnu\tNW_type\n" + str(self.n_segments) + '\t' + str(self.l_bond) + '\t' + str(self.c_n) + "\t" + str(round(self.nu, 5)) + '\t' + self.structure)
-		with open(os.path.join(target_dir, "calc_cond.txt"), "w") as f:
-			f.write(self.cond_txt)
+		# with open(os.path.join(target_dir, "calc_cond.txt"), "w") as f:
+		# 	f.write(self.cond_txt)
 		return target_dir
 
 	############################################
