@@ -7,7 +7,7 @@ import modules_1
 def main():
 ################################################################
 # 設定条件を読み込み、ネットワークポリマーの諸量を計算
-    basic_cond, nw_cond, sim_cond, rnd_cond, target_cond, condition_text = modules_1.ReadNWConditions.setupcondition()
+    basic_cond, nw_cond, sim_cond, rnd_cond, target_cond = modules_1.ReadNWConditions.setupcondition()
 
     ####################
     # ネットワークを設定
@@ -16,7 +16,7 @@ def main():
 
     ##################
     # baseUDF の作成
-    baseudf = modules_1.SetupInitUDF.MakeInitUDF(basic_cond, nw_cond, sim_cond, target_cond, calcd_data_dic, condition_text)
+    baseudf = modules_1.SetupInitUDF.MakeInitUDF(basic_cond, nw_cond, sim_cond, target_cond, calcd_data_dic)
     target_dir = baseudf.setup_baseudf()
     ###############
     # シミュレーションを設定
