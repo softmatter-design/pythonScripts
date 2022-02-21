@@ -205,13 +205,21 @@ class Setup:
 		script += 'import os \nimport sys \n'
 		script += 'path_mod = "' + self.path_mod + '"\n'
 		script += 'sys.path.append(path_mod)\n'
+<<<<<<< HEAD
 		script += 'from network_evaluation import Read_Stress as rs\n################################\n'
+=======
+		script += 'from network_evaluation import Read_Shear as rs\n################################\n'
+>>>>>>> b3905caa0f6399790a7c1616ecd19a6536951212
 		script += 'func = ' + str(func) + '\nnu = ' + str(nu) + '\nstructure = "' + structure + '"\n'
 		script += '################################\n'
 		script += 't_udf_list = rs.file_listing()\n'
 		script += 'stress_data = rs.calc_stress_all(t_udf_list)\n'
 		script += 'target_list = rs.save_data(stress_data, t_udf_list)\n'
+<<<<<<< HEAD
 		script += 'rs.plot(func, nu, structure, target_list)\n'
+=======
+		script += 'rs.plot(target_list)\n'
+>>>>>>> b3905caa0f6399790a7c1616ecd19a6536951212
 		return script
 		
 ################################################################################
