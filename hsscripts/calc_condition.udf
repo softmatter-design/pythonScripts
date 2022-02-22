@@ -4,7 +4,7 @@
 			Cognac_ver:select{"cognac112"} "使用する Cognac のバージョン",
 			Cores: int "計算に使用するコア数を指定"
 			} "計算の条件を設定"
-		SimulationCond:{
+		TargetCond:{
 			Model:{TargetModel:select{"Regular_NW", "Random_NW"} "ネットワークのモデルを選択",
 				Regular_NW:{chains:select{"3_Chain_S", "3_Chain_D", "4_Chain", "6_Chain", "8_Chain"} "分岐の数と種類を選択"
 					} "規則構造での条件を入力",
@@ -15,51 +15,46 @@
 					N_histgram:int "ヒストグラムの分割数"
 					} "ランダム構造での条件を入力"
 				} "シミュレーションの条件を設定"
+			NetWork:{N_Segments: int "ストランド中のセグメント数", 
+					N_Subchain: int "各セグメントの側鎖の数", 
+					N_UnitCells: int "一辺あたりのユニットセルの数"
+				} "ネットワークの条件を設定"
+			Multiplisity:{Set_or_Calc:select{"Set", "Calc"} "多重度を設定するかどうかを決める",
+					Set:{Multiplicity: int} "多重度を設定"
+				} "ネットワークの多重度を設定"
+			Shrinkage:{Shrink:select{"Yes", "No"} "ストランドを自然長から圧縮するかどうかを決める"
+				Yes:{target_density: float},
+				No:{target_density: float}
+				} "ストランドを自然長から圧縮するかどうかを決める"
 			Type:{
-				SimType:select{
-					"NPT",
-					"Entangled",
-					"Multi",   
-					"Multi_entangled",
-					"Gel",    
-					"Gel_entangled",
-					"Gel_concd",
-					"Gel_concd_entangled"
-					} "アンサンブル等のシミュレーションの条件を選択",
-					NPT:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", ExpansionRatio: float "NPT 計算での初期膨張率", StepPress[]: float "NPT 計算での圧力変化"} "密度、末端間距離を設定値に合わせるように多重度を自動設定。\n絡み合いが入らないようにNPTで縮める。",
-					Entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Step_rfc[]: float "Slow Push Off での rfc 条件"} "密度、末端間距離を設定値に合わせるように多重度を自動設定。\n絡み合いが入るように初期化",
-					Multi:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", ExpansionRatio: float "NPT 計算での初期膨張率", StepPress[]: float "NPT 計算での圧力変化"} "設定した多重度で、密度を設定値になるように、システムサイズを縮める",
-					Multi_entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", Step_rfc[]: float "Slow Push Off での rfc 条件"} "設定した多重度で、密度を設定値になるようにシステムサイズを縮め、絡み合いが入るように初期化",
-					Gel:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", ExpansionRatio: float "NPT 計算での初期膨張率", StepPress[]: float "NPT 計算での圧力変化"} "設定した多重度で、密度、末端間距離を設定値に合わせるように溶剤を添加",
-					Gel_entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", Step_rfc[]: float "Slow Push Off での rfc 条件"} "設定した多重度で、密度、末端間距離を設定値に合わせるように溶剤を添加、絡み合いが入るように初期化",
-					Gel_concd:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", NV: float "Non Volatile: 固形分量 (0 to 1.0)", ExpansionRatio: float "NPT 計算での初期膨張率", StepPress[]: float "NPT 計算での圧力変化"} "設定した多重度で、溶剤量変化",
-					Gel_concd_entangled:{N_Segments: int "ストランド中のセグメント数", N_Subchain: int "各セグメントの側鎖の数", N_UnitCells: int "一辺あたりのユニットセルの数", Multiplicities: int "任意の多重度に設定可能", NV: float "Non Volatile: 固形分量 (0 to 1.0)", Step_rfc[]: float "Slow Push Off での rfc 条件"} "設定した多重度で、溶剤量変化、絡み合いが入るように初期化"
-				} "アンサンブル等のシミュレーションの条件を選択",
+				Topology:select{"Entangled", "NO_Entangled"} "ネットワーク・トポロジーを選択",
+					Entangled:{Step_rfc[]: float "Slow Push Off での rfc 条件"} "密度、末端間距離を設定値に合わせるように多重度を自動設定。\n絡み合いが入るように初期化",
+					NO_Entangled:{ExpansionRatio: float "NPT 計算での初期膨張率", StepPress[]: float "NPT 計算での圧力変化"} "密度、末端間距離を設定値に合わせるように多重度を自動設定。\n絡み合いが入らないようにNPTで縮める。"
+				} "ネットワーク・トポロジーを選択",
+			} "計算ターゲットの条件を設定"
+		SimulationCond:{
 			Equilib_Condition:{
 					repeat: int "平衡化計算の繰り返し数",
 					Time:{delta_T: double, Total_Steps: int, Output_Interval_Steps: int} "平衡化計算の時間条件を入力"
-				},
-			target_density:float "平衡化シミュレーション実行時に使用する密度"
+				} "平衡化計算の時間条件を入力"
 			} "シミュレーションの条件を設定"
 	\end{def}
 
 	\begin{data}
-		CalcCond:{"cognac112", 1}
-
-		SimulationCond:{
-			{"Regular_NW", {"4_Chain"}, {"4_Chain", "Calc", {1000, 100, 1000, 100, 1}, {""}, 50}}
-			{"NPT",
-				{20, 0, 3, 2.0, [0.2, 0.5, 1.0, 2.0, 3.0, 4.5]},
-				{20, 0, 3, [1.073, 1.0, 0.9, 0.8]},
-				{20, 0, 3, 1, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
-				{20, 0, 3, 1, [1.073, 1.0, 0.9, 0.8]},
-				{20, 0, 3, 1, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
-				{20, 0, 3, 1, [1.073, 1.0, 0.9, 0.8]},
-				{20, 0, 3, 1, 0.5, 2.0, [0.2, 0.5, 1.0, 2.0, 5.0, 6.5, 7.0]},
-				{20, 0, 3, 1, 0.5, [1.073, 1.0, 0.9, 0.8]}
-			},
-			{4, {0.01, 200000, 1000}},
-		0.85
+		CalcCond:{"cognac112",1}
+TargetCond:{
+	{"Random_NW",{"4_Chain"}{"4_Chain","Read",{100,100,100,100,1}{"4_chains_3_cells_100_trials_100_sampling"}50}}
+	{20, 0, 3}
+	{"Set", {1}}
+	{"Yes", {0.850} {0.850}}
+	{"Entangled",
+		{[1.0730000,1.0000000,0.9000000,0.8000000]},
+		{2.0000000, [0.2000000,0.5000000,1.0000000,2.0000000,3.0000000,4.5000000]}
 		}
-	\end{data}
+	}
+SimulationCond:{
+	{4,{1.00000000000000e-02,200000,1000}}
+	}
+
+\end{data}
 	

@@ -55,13 +55,11 @@ def makenewudf():
 					Set:{Multiplicity: int} "多重度を設定"
 				} "ネットワークの多重度を設定"
 			Shrinkage:{Shrink:select{"Yes", "No"} "ストランドを自然長から圧縮するかどうかを決める"
-				target_density: float
+				Yes:{target_density: float},
+				No:{target_density: float}
 				} "ストランドを自然長から圧縮するかどうかを決める"
 			Type:{
-				Topology:select{
-					"Entangled",
-					"NO_Entangled"
-					} "ネットワーク・トポロジーを選択",
+				Topology:select{"Entangled", "NO_Entangled"} "ネットワーク・トポロジーを選択",
 					Entangled:{Step_rfc[]: float "Slow Push Off での rfc 条件"} "密度、末端間距離を設定値に合わせるように多重度を自動設定。\\n絡み合いが入るように初期化",
 					NO_Entangled:{ExpansionRatio: float "NPT 計算での初期膨張率", StepPress[]: float "NPT 計算での圧力変化"} "密度、末端間距離を設定値に合わせるように多重度を自動設定。\\n絡み合いが入らないようにNPTで縮める。"
 				} "ネットワーク・トポロジーを選択",
@@ -80,7 +78,7 @@ TargetCond:{
 	{"Random_NW",{"4_Chain"}{"4_Chain","Read",{100,100,100,100,1}{"4_chains_3_cells_100_trials_100_sampling"}50}}
 	{20, 0, 3}
 	{"Set", {1}}
-	{"No", 0.850}
+	{"Yes", {0.850} {0.850}}
 	{"Entangled",
 		{[1.0730000,1.0000000,0.9000000,0.8000000]},
 		{2.0000000, [0.2000000,0.5000000,1.0000000,2.0000000,3.0000000,4.5000000]}
